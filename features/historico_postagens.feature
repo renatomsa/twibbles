@@ -1,3 +1,3 @@
-historico de postagens de cada usuário
+feature : historico de postagens de cada usuário
 
-oi
+cenário 1 : 
