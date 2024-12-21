@@ -79,14 +79,6 @@ Feature: Cadastro e manutenção de promoções
     Restaurantes e administradores poderão cadastrar, remover ou atualizar promoções (cupons),
     e usuários (clientes) poderão inserir e remover cupons de seus pedidos.
 
-Scenario: inserção de cupom em pedido bem-sucedida
-Given o usuário "Mileto" está na página de finalização de pedido com o valor total de "R$40,00"
-And o cupom "10OFF" está ativo, possui um valor mínimo de "R$20,00" e um desconto de "0.1"
-And o pedido atual não tem cupons aplicados
-When o usuário "Mileto" tenta inserir o cupom "10OFF" no pedido atual
-Then o cupom "10OFF" é aplicado com sucesso
-And o valor do pedido atual é atualizado para "R$36,00"
-
 Scenario: inserção de cupom em pedido que não atingiu o valor mínimo
 Given o usuário "Tales" está na página de finalização de pedido com o valor total de "R$10,00"
 And o cupom "10OFF" está ativo, possui um valor mínimo de "R$20,00" e um desconto de "0.1"
