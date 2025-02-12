@@ -21,7 +21,6 @@ class Database():
             mongo_connection = MongoClient(env.DB_URL)
 
             logger.setLevel(INFO)
-
             self.db = mongo_connection[env.DB_NAME]
 
             print("--------------------")
