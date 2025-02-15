@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from os import environ
 
 # Load environment variables from .env file
-load_dotenv("backend/src/config/.env")
+load_dotenv("/Users/joaohlessa/Documents/faculdade/6periodo/engenharia_de_software/projeto/twibbles/backend/.env.example")
 
 class Environment():
     """
