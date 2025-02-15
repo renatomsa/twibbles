@@ -8,6 +8,7 @@ from alembic import context
 
 from model.sqlalchemy.base import Base
 from model.sqlalchemy import user
+from model.sqlalchemy import following
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
