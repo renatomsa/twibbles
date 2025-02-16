@@ -4,6 +4,7 @@ from model.sqlalchemy.user import User
 from model.sqlalchemy.following import Following
 from model.sqlalchemy.follow_requests import FollowRequest
 from model.pydantic.user import User as UserPydantic
+from model.pydantic.follow_request import FollowRequest as FollowRequestPydantic
 
 from src.service.impl.user_service import get_user
 
@@ -110,8 +111,9 @@ def get_follow_requests_by_requester_id(requester_id: int):
         result = []
         for f in follow_requests:
             f = f.FollowRequest
-            result.append({"requester_id": f.requester_id,
-                           "requested_id": f.requested_id})
+            to_append = FollowRequestPydantic(requester_id=f.requester_id,
+                                              requested_id=f.requested_id)
+            result.append(to_append)
         return {"status": "ok", "data": result}
 
 
@@ -122,6 +124,7 @@ def get_follow_requests_by_requested_id(requested_id: int):
         result = []
         for f in follow_requests:
             f = f.FollowRequest
-            result.append({"requester_id": f.requester_id,
-                           "requested_id": f.requested_id})
+            to_append = FollowRequestPydantic(requester_id=f.requester_id,
+                                              requested_id=f.requested_id)
+            result.append(to_append)
         return {"status": "ok", "data": result}
