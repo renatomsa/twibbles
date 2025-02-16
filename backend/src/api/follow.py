@@ -56,3 +56,21 @@ def reject_follow_request(requester_id: int, requested_id: int):
         return HttpResponseModel(status_code=status.HTTP_200_OK, message="OK", data=result)
     except Exception as e:
         return HttpResponseModel(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+    
+
+@api.get("/{user_id}/follow_requests_as_requester", response_model=HttpResponseModel)
+def get_follow_requests_as_requester(user_id: int):
+    try:
+        result = follow_service.get_follow_requests_by_requester_id(user_id)
+        return HttpResponseModel(status_code=status.HTTP_200_OK, message="OK", data=result)
+    except Exception as e:
+        return HttpResponseModel(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+
+
+@api.get("/{user_id}/follow_requests_as_requested", response_model=HttpResponseModel)
+def get_follow_requests_as_requested(user_id: int):
+    try:
+        result = follow_service.get_follow_requests_by_requested_id(user_id)
+        return HttpResponseModel(status_code=status.HTTP_200_OK, message="OK", data=result)
+    except Exception as e:
+        return HttpResponseModel(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))

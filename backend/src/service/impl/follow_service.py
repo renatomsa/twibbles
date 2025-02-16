@@ -101,4 +101,27 @@ def unfollow(follower_id: int, followed_id: int):
         session.delete(following)
         session.commit()
         return {"status": "success", "message": "Unfollowed successfully"}
-    
+
+
+def get_follow_requests_by_requester_id(requester_id: int):
+    with Session(postgresql_engine) as session:
+        statement = select(FollowRequest).where(FollowRequest.requester_id == requester_id)
+        follow_requests = session.execute(statement).fetchall()
+        result = []
+        for f in follow_requests:
+            f = f.FollowRequest
+            result.append({"requester_id": f.requester_id,
+                           "requested_id": f.requested_id})
+        return {"status": "ok", "data": result}
+
+
+def get_follow_requests_by_requested_id(requested_id: int):
+    with Session(postgresql_engine) as session:
+        statement = select(FollowRequest).where(FollowRequest.requested_id == requested_id)
+        follow_requests = session.execute(statement).fetchall()
+        result = []
+        for f in follow_requests:
+            f = f.FollowRequest
+            result.append({"requester_id": f.requester_id,
+                           "requested_id": f.requested_id})
+        return {"status": "ok", "data": result}
