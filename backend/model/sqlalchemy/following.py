@@ -14,8 +14,8 @@ class Following(Base):
     followed_id: Mapped[int] = mapped_column(ForeignKey("user_account.id"), primary_key=True)
 
     follower: Mapped["User"] = relationship(
-        "User", back_populates="following", foreign_keys=[follower_id]
+        "User", foreign_keys="Following.follower_id"
     )
     followed: Mapped["User"] = relationship(
-        "User", back_populates="followers", foreign_keys=[followed_id]
+        "User", foreign_keys="Following.followed_id"
     )
