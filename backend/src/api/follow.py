@@ -26,7 +26,7 @@ def follow(follower_id: int, followed_id: int):
 @api.post("/{follower_id}/unfollow/{followed_id}", response_model=HttpResponseModel)
 def unfollow(follower_id: int, followed_id: int):
     unfollow_response = follow_service.unfollow(follower_id, followed_id)
-    return unfollow_response    
+    return unfollow_response
 
 
 @api.post("/{requester_id}/accept_request/{requested_id}", response_model=HttpResponseModel)

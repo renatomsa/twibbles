@@ -26,7 +26,7 @@ def get_following(user_id: int):
                                     is_private=f.is_private).model_dump()
                 result.append(user)
 
-            return HttpResponseModel(status_code=200, message="OK", data=result)
+            return HttpResponseModel(status_code=200, message="Followed users retrieved successfully", data=result)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
 
@@ -45,7 +45,7 @@ def get_followers(user_id: int):
                                     is_private=f.is_private).model_dump()
                 result.append(user)
 
-            return HttpResponseModel(status_code=200, message="OK", data=result)
+            return HttpResponseModel(status_code=200, message="Followers retrieved successfully", data=result)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
 
@@ -66,7 +66,7 @@ def follow(follower_id: int, followed_id: int):
                 return request_follow(follower_id, followed_id)
             session.add(Following(follower_id=follower_id, followed_id=followed_id))
             session.commit()
-            return HttpResponseModel(status_code=200, message="Followed successfully")
+            return HttpResponseModel(status_code=201, message="Followed successfully")
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
 
@@ -82,7 +82,7 @@ def request_follow(follower_id: int, followed_id: int):
 
             session.add(FollowRequest(requester_id=int(follower_id), requested_id=int(followed_id)))
             session.commit()
-            return HttpResponseModel(status_code=200, message="Follow request sent")
+            return HttpResponseModel(status_code=201, message="Follow request sent")
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
 
@@ -93,12 +93,12 @@ def accept_follow_request(requester_id: int, requested_id: int):
             statement = select(FollowRequest).where(FollowRequest.requester_id == requester_id, FollowRequest.requested_id == requested_id)
             follow_request = session.execute(statement).fetchone()
             if follow_request is None:
-                return HttpResponseModel(status_code=400, message="Follow request not found")
+                return HttpResponseModel(status_code=404, message="Follow request not found")
             follow_request = follow_request[0]
             session.delete(follow_request)
             session.add(Following(follower_id=int(requester_id), followed_id=int(requested_id)))
             session.commit()
-            return HttpResponseModel(status_code=200, message="Follow request accepted")
+            return HttpResponseModel(status_code=201, message="Follow request accepted")
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
 
@@ -109,7 +109,7 @@ def reject_follow_request(requester_id: int, requested_id: int):
             statement = select(FollowRequest).where(FollowRequest.requester_id == requester_id, FollowRequest.requested_id == requested_id)
             follow_request = session.execute(statement).fetchone()
             if follow_request is None:
-                return HttpResponseModel(status_code=400, message="Follow request not found")
+                return HttpResponseModel(status_code=404, message="Follow request not found")
             follow_request = follow_request[0]
             session.delete(follow_request)
             session.commit()
