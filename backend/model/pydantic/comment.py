@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class CommentBase(BaseModel):
     content: str
@@ -12,5 +12,4 @@ class CommentRead(CommentBase):
     user_id: int
     post_id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
