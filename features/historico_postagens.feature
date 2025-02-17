@@ -53,13 +53,6 @@ When O usuário tenta excluir a postagem "p1"
 Then A postagem "p1" não é mais exibida na página "Histórico de postagens"
 And A seguinte mensagem é exibida na tela : "Postagem foi excluída com sucesso"
 
-Scenario: Exclusão de uma postagem (serviço)
-Given O sistema possui a postagem "p1" criada pelo usuário "João Henrique"
-And O usuário "João Henrique" está logado
-When O usuário envia uma requisição DELETE para a rota "user/João Henrique/posts/p1"
-Then O sistema não possui a postagem "p1" criada pelo usuário "João Henrique"
-And A seguinte resposta é enviada pelo sistema para o usuário : "Postagem foi excluída com sucesso"
-
 Scenario: Navegação pelo histórico de postagens com scroll infinito
 Given O usuário está logado como "João Henrique" na página "Histórico de postagens"
 And O usuário possui a postagens "p1" com data "22/05/2028", "p2" com data "18/12/2018", "p3" com data "10/01/2013" e "p4" com data "12/12/2012".
@@ -68,3 +61,24 @@ And O filtro selecionado para a exibição das postagens é "Mais recentes".
 When O usuário desliza até o final da página
 Then As postagens "p3" e "p4" são exibidas
 And As postagens "p1" e "p2" não são exibidas
+
+# SERVIÇO
+Scenario: Exclusão de uma postagem (serviço)
+Given O sistema possui a postagem "p1" criada pelo usuário "João Henrique"
+And O usuário "João Henrique" está logado
+When O usuário envia uma requisição DELETE para a rota "user/João Henrique/posts/p1"
+Then O sistema não possui a postagem "p1" criada pelo usuário "João Henrique"
+And A seguinte resposta é enviada pelo sistema para o usuário : "Postagem foi excluída com sucesso"
+
+Scenario: Visualização das postagens próprias ordenadas de acordo com a data
+Given O usuário "João Henrique" está autenticado no sistema
+And O usuário possui as postagens "p1", com data "22/05/2028", "p2" com data "18/12/2018", "p3" com data "10/01/2013" e "p4" com data "12/12/2012"
+And O usuário solicita a primeira página de postagens com limite de 2 itens, ordenadas por "Mais recentes"
+When O serviço retorna a lista de postagens
+Then A resposta contém as postagens "p1" com data "22/05/2028" e "p2" com data "18/12/2018"
+
+Scenario: Carregar mais postagens ao solicitar a próxima página
+Given O usuário "João Henrique" já recebeu a primeira página de postagens com as postagens "p1", de data "22/05/2028" e "p2" de data "18/12/2018"
+When O usuário solicita a próxima página de postagens com limite de 2 itens
+Then A resposta contém as postagens "p3" de data "10/01/2013" e "p4" de data "12/12/2012"
+And A resposta não contém as postagens "p1" de data "22/05/2028" e "p2" de data "18/12/2018"

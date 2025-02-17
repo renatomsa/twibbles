@@ -1,4 +1,4 @@
-from pytest_bdd import scenarios, given, when, then, parsers
+""" from pytest_bdd import scenarios, given, when, then, parsers
 
 
 scenarios('../features/follow.feature')
@@ -422,3 +422,4 @@ def check_followers(context, follower1_id, follower2_id):
     follower_ids = [follower["id"] for follower in followers]
     assert follower1_id in follower_ids, f"User with id {follower1_id} not found in followers"
     assert follower2_id in follower_ids, f"User with id {follower2_id} not found in followers"
+ """

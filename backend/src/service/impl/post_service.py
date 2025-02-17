@@ -40,7 +40,7 @@ def get_posts(user_id: int):
                                      data=result)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
-    
+
 def delete_post(user_id: int, post_id: int):
     try:
         with Session(postgresql_engine) as session:
@@ -61,20 +61,81 @@ def delete_post(user_id: int, post_id: int):
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
 
+def get_posts_by_location(location: str) -> HttpResponseModel:
+    try:
+        with Session(postgresql_engine) as session:
+            stmt = (
+                select(Post)
+                .where(Post.location == location)
+                .order_by(Post.date_time.desc())
+            )
+            posts = session.execute(stmt).scalars().all()
+
+            if not posts:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="No posts found for this location"
+                )
+
+            post_list = [PostPydantic.model_validate(p) for p in posts]
+
+            return HttpResponseModel(
+                status_code=200,
+                message="Posts found",
+                data=post_list
+            )
+    except Exception as e:
+        return HttpResponseModel(
+            status_code=500,
+            message=str(e)
+        )
+
+
+def get_posts_by_hashtag(hashtag: str) -> HttpResponseModel:
+    try:
+        with Session(postgresql_engine) as session:
+            # Exemplo de busca por substring (caso 'hashtags' armazene "#foo #bar #baz")
+            stmt = (
+                select(Post)
+                .where(Post.hashtags.ilike(f"%{hashtag}%"))
+                .order_by(Post.date_time.desc())
+            )
+            posts = session.execute(stmt).scalars().all()
+
+            if not posts:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="No posts found for this hashtag"
+                )
+
+            post_list = [PostPydantic.model_validate(p) for p in posts]
+
+            return HttpResponseModel(
+                status_code=200,
+                message="Posts found",
+                data=post_list
+            )
+    except Exception as e:
+        return HttpResponseModel(
+            status_code=500,
+            message=str(e)
+        )
+
+
 def get_date_range(period):
     end_date = datetime.today()
-    if period == "last_7_days":
+    if period == 7:
         start_date = end_date - timedelta(days=7)
-    elif period == "last_30_days":
+    elif period == 30:
         start_date = end_date - timedelta(days=30)
-    elif period == "last_365_days":
+    elif period == 365:
         start_date = end_date - timedelta(days=365)
     else:
-        raise ValueError("Invalid flag. Use 'last_7_days', 'last_30_days', or 'last_365_days'.")
+        raise ValueError("Invalid flag. Use 7, 30, or 365.")
 
     return start_date, end_date
 
-def get_dashboard_data(user_id: int, period: str):
+def get_dashboard_data(user_id: int, period: int):
     start_date, end_date = get_date_range(period)
     try:
         with Session(postgresql_engine) as session:
@@ -100,7 +161,8 @@ def get_dashboard_data(user_id: int, period: str):
             result = []
             result.append(comment_avg)
             for c in comments:            
-                result.append(c)
+                if(c > 0):
+                    result.append(c)
 
             return HttpResponseModel(status_code=200,
                                      message="Dashboard ready",

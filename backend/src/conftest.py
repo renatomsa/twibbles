@@ -1,10 +1,10 @@
-import pytest
-from fastapi.testclient import TestClient
 from typing import Generator
 
+import pytest
 from dotenv import load_dotenv
+from fastapi.testclient import TestClient
 
-load_dotenv(dotenv_path="")  # pass in the abspath to the env file
+load_dotenv(dotenv_path="backend/credentials.env")  # pass in the abspath to the env file
 
 from src.main import app
 

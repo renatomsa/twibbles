@@ -1,9 +1,10 @@
-from typing import TYPE_CHECKING
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, Integer, String, DateTime
-from model.sqlalchemy.base import Base
 from datetime import datetime as dt
 from datetime import timezone
+from typing import TYPE_CHECKING
+
+from model.sqlalchemy.base import Base
+from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from model.sqlalchemy.post import Post
@@ -18,5 +19,9 @@ class Comment(Base):
     content: Mapped[str] = mapped_column(String(600), nullable=False)
     created_at: Mapped[dt] = mapped_column(DateTime, default=dt.now(timezone.utc), nullable=False)
 
-    user: Mapped["User"] = relationship("User", back_populates="comments")
-    post: Mapped["Post"] = relationship("Post", back_populates="comments")
+    user: Mapped["User"] = relationship(
+        "User", foreign_keys=[user_id]
+    )
+    requester: Mapped["Post"] = relationship(
+        "Post", foreign_keys=[post_id]
+    )
