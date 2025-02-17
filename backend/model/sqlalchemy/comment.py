@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from model.sqlalchemy.user import User
 
 class Comment(Base):
-    tablename = "comments"
+    __tablename__ = "comments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user_account.id"), nullable=False)
