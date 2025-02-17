@@ -4,6 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from src.engine import postgresql_engine
 from src.schemas.response import HttpResponseModel
+from src.schemas.user import UserRegisterRequest
+from pydantic.error_wrappers import ValidationError
 
 
 def get_user(user_id: int):
@@ -60,5 +62,43 @@ def update_user_privacy(user_id: int, is_private: bool):
 
             return HttpResponseModel(status_code=200,
                                         message="User privacy updated")
+    except Exception as e:
+        return HttpResponseModel(status_code=500, message=str(e))
+
+def register_user(user_data: UserRegisterRequest):
+    try:
+        # Caso haja alguma inconsistência no payload, o Pydantic já terá levantado a exceção
+        with Session(postgresql_engine) as session:
+            # Verificar se o nome de usuário já existe
+            stmt = select(User).where(User.user_name == user_data.user_name).limit(1)
+            user_existente = session.execute(stmt).scalars().first()
+            if user_existente:
+                return HttpResponseModel(
+                    status_code=409, 
+                    message="Nome de usuário já existe"
+                )
+
+            # Criação do novo usuário
+            # Aqui, lembre de realizar o hash da senha antes de salvar (caso necessário)
+            novo_usuario = User(
+                nome=user_data.nome,
+                user_name=user_data.user_name,
+                email=user_data.email,
+                senha=user_data.senha,  # Considere aplicar hashing!
+                is_private=False  # Valor default ou conforme sua lógica
+            )
+            session.add(novo_usuario)
+            session.commit()
+            session.refresh(novo_usuario)
+
+            return HttpResponseModel(
+                status_code=201,
+                message="Usuário registrado com sucesso!",
+                data={"id": novo_usuario.id}
+            )
+    except ValidationError as e:
+        # Caso alguma validação do schema falhe (por exemplo, senhas não coincidem ou email inválido)
+        error_msg = e.errors()[0]['msg'] if e.errors() else "Dados inválidos"
+        return HttpResponseModel(status_code=400, message=error_msg)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))

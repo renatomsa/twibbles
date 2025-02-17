@@ -1,6 +1,7 @@
 import src.service.impl.user_service as user_service
 from fastapi import APIRouter
 from src.schemas.response import HttpResponseModel
+from src.schemas.user import UserRegisterRequest
 
 api = APIRouter()
 
@@ -19,3 +20,8 @@ def get_users_by_substring(substring: str):
 def update_user_privacy(user_id: int, is_private: bool):
     update_user_response = user_service.update_user_privacy(user_id, is_private)
     return update_user_response
+
+@api.post("/", response_model=HttpResponseModel, status_code=201)
+def register_user(user: UserRegisterRequest):
+    response = user_service.register_user(user)
+    return response
