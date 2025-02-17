@@ -75,7 +75,7 @@ def post_post(post_id: int, text: str):
             session.add(post)
             session.commit()
 
-            return HttpResponseModel(status_code=201, message="Post created")
+            return HttpResponseModel(status_code=200, message="Post created")
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
 

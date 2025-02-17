@@ -20,7 +20,7 @@ def get_dashboard(user_id : int, metric : str, period : str):
     get_dashboard_response = post_service.get_dashboard(user_id, metric, period)
     return get_dashboard_response
 
-@api.post("/{user_id}/posts", response_model=HttpResponseModel)
+@api.post("/{user_id}/posts/{text}", response_model=HttpResponseModel)
 def post_post(user_id : int, text : str):
     post_post_response = post_service.post_post(user_id, text)
     return post_post_response
