@@ -33,7 +33,7 @@ def get_posts(user_id: int):
                                      data=result)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
-    
+
 def delete_post(user_id: int, post_id: int):
     try:
         with Session(postgresql_engine) as session:
@@ -53,3 +53,63 @@ def delete_post(user_id: int, post_id: int):
                                      message="Post deleted")
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
+
+def get_posts_by_location(location: str) -> HttpResponseModel:
+    try:
+        with Session(postgresql_engine) as session:
+            stmt = (
+                select(Post)
+                .where(Post.location == location)
+                .order_by(Post.date_time.desc())
+            )
+            posts = session.execute(stmt).scalars().all()
+
+            if not posts:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="No posts found for this location"
+                )
+
+            post_list = [PostPydantic.model_validate(p) for p in posts]
+
+            return HttpResponseModel(
+                status_code=200,
+                message="Posts found",
+                data=post_list
+            )
+    except Exception as e:
+        return HttpResponseModel(
+            status_code=500,
+            message=str(e)
+        )
+
+
+def get_posts_by_hashtag(hashtag: str) -> HttpResponseModel:
+    try:
+        with Session(postgresql_engine) as session:
+            # Exemplo de busca por substring (caso 'hashtags' armazene "#foo #bar #baz")
+            stmt = (
+                select(Post)
+                .where(Post.hashtags.ilike(f"%{hashtag}%"))
+                .order_by(Post.date_time.desc())
+            )
+            posts = session.execute(stmt).scalars().all()
+
+            if not posts:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="No posts found for this hashtag"
+                )
+
+            post_list = [PostPydantic.model_validate(p) for p in posts]
+
+            return HttpResponseModel(
+                status_code=200,
+                message="Posts found",
+                data=post_list
+            )
+    except Exception as e:
+        return HttpResponseModel(
+            status_code=500,
+            message=str(e)
+        )
