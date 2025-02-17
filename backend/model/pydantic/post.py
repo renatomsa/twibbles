@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -6,4 +7,5 @@ class Post(BaseModel):
     user_id: int
     text: str
     date : datetime
-
+    location: Optional[str] = None
+    hashtags: Optional[str] = None
