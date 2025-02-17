@@ -1,5 +1,3 @@
-# backend/services/comment_service.py
-
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from src.engine import postgresql_engine

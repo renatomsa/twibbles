@@ -3,7 +3,7 @@ from typing import Optional
 from model.sqlalchemy.base import Base
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from backend.model.sqlalchemy.comment import Comment
+from model.sqlalchemy.comment import Comment
 
 
 class User(Base):

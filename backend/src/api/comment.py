@@ -1,5 +1,3 @@
-# backend/api/comment.py
-
 from fastapi import APIRouter, Body
 from src.schemas.response import HttpResponseModel
 import src.service.impl.comment_service as comment_service

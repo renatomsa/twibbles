@@ -1,10 +1,13 @@
+from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, Integer, String, DateTime
-from backend.model.sqlalchemy.post import Post
-from backend.model.sqlalchemy.user import User
 from model.sqlalchemy.base import Base
 from datetime import datetime as dt
 from datetime import timezone
+
+if TYPE_CHECKING:
+    from model.sqlalchemy.post import Post
+    from model.sqlalchemy.user import User
 
 class Comment(Base):
     __tablename__ = "comments"
