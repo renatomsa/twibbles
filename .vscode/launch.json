@@ -5,7 +5,7 @@
         // main is in src/main.py
         {
             "name": "Python: Uvicorn",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
             "args": [
@@ -19,12 +19,12 @@
             "jinja": true,
             "envFile": "${workspaceFolder}/backend/credentials.env",
             "cwd": "${workspaceFolder}/backend"
-        }
+        },
         // o autogenerate serve basicamente pra comparar o estado atual do banco com o estado
         // atual da base declarada no código e gerar um arquivo de migração
         {
             "name": "Alembic Autogenerate Revision",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "alembic",
             "args": [
@@ -39,7 +39,7 @@
         // compara o id da ultima migration com o estado atual do bando e aplica todas as migrações
         {
             "name": "Alembic Upgrade Head",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "alembic",
             "args": [
