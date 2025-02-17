@@ -1,7 +1,13 @@
 import pytest
 from fastapi.testclient import TestClient
 from typing import Generator
+
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path="")  # pass in the abspath to the env file
+
 from src.main import app
+
 
 @pytest.fixture(scope="function")
 def client() -> Generator:
@@ -10,6 +16,7 @@ def client() -> Generator:
     """
     with TestClient(app) as c:
         yield c
+
 
 @pytest.fixture
 def context():
