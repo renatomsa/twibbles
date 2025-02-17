@@ -67,9 +67,7 @@ def update_user_privacy(user_id: int, is_private: bool):
 
 def register_user(user_data: UserRegisterRequest):
     try:
-        # Caso haja alguma inconsistência no payload, o Pydantic já terá levantado a exceção
         with Session(postgresql_engine) as session:
-            # Verificar se o nome de usuário já existe
             stmt = select(User).where(User.user_name == user_data.user_name).limit(1)
             user_existente = session.execute(stmt).scalars().first()
             if user_existente:
@@ -78,14 +76,12 @@ def register_user(user_data: UserRegisterRequest):
                     message="Nome de usuário já existe"
                 )
 
-            # Criação do novo usuário
-            # Aqui, lembre de realizar o hash da senha antes de salvar (caso necessário)
             novo_usuario = User(
                 nome=user_data.nome,
                 user_name=user_data.user_name,
                 email=user_data.email,
-                senha=user_data.senha,  # Considere aplicar hashing!
-                is_private=False  # Valor default ou conforme sua lógica
+                senha=user_data.senha,
+                is_private=False
             )
             session.add(novo_usuario)
             session.commit()
@@ -97,7 +93,6 @@ def register_user(user_data: UserRegisterRequest):
                 data={"id": novo_usuario.id}
             )
     except ValidationError as e:
-        # Caso alguma validação do schema falhe (por exemplo, senhas não coincidem ou email inválido)
         error_msg = e.errors()[0]['msg'] if e.errors() else "Dados inválidos"
         return HttpResponseModel(status_code=400, message=error_msg)
     except Exception as e:
