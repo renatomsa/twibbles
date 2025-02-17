@@ -10,6 +10,7 @@ from model.sqlalchemy.base import Base
 from model.sqlalchemy import user
 from model.sqlalchemy import following
 from model.sqlalchemy import follow_requests
+from model.sqlalchemy import comment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
