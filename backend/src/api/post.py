@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from src.schemas.response import HttpResponseModel
 import src.service.impl.post_service as post_service
+import src.service.impl.follow_service as follow_service
 
 api = APIRouter()
 
@@ -18,3 +19,15 @@ def delete_post(user_id : int, post_id : int):
 def get_dashboard(user_id : int, metric : str, period : str):
     get_dashboard_response = post_service.get_dashboard(user_id, metric, period)
     return get_dashboard_response 
+
+@api.post("/{user_id}/posts", response_model=HttpResponseModel)
+def post_post(user_id : int, text : str):
+    post_post_response = post_service.post_post(user_id, text)
+    return post_post_response
+
+@api.get("/{user_id}/feed", response_model=HttpResponseModel)
+def load_feed(user_id: int):
+    following_ids = follow_service.get_following_ids(user_id).data or []
+    load_feed_response = post_service.load_feed(following_ids)
+    return load_feed_response
+

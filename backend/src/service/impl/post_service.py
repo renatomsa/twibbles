@@ -6,6 +6,8 @@ from model.pydantic.user import User as UserPydantic
 from model.sqlalchemy.post import Post
 from model.pydantic.post import Post as PostPydantic
 
+from model.sqlalchemy.following import Following
+
 from src.schemas.response import HttpResponseModel
 
 from sqlalchemy import select
@@ -51,5 +53,60 @@ def delete_post(user_id: int, post_id: int):
 
             return HttpResponseModel(status_code=200,
                                      message="Post deleted")
+    except Exception as e:
+        return HttpResponseModel(status_code=500, message=str(e))
+    
+def post_post(post_id: int, text: str):
+    try:
+        if len(text.strip()) == 0:
+            return HttpResponseModel(status_code=400, message="Post text cannot be empty")
+        
+        if len(text) > 280:
+            return HttpResponseModel(status_code=400, message="Post text cannot exceed 280 characters")
+
+        with Session(postgresql_engine) as session:
+            statement = select(User).where(User.id == post_id)
+            user = session.execute(statement).scalars().first()
+
+            if user is None:
+                return HttpResponseModel(status_code=404, message="User not found")
+
+            post = Post(user_id=post_id, text=text)
+            session.add(post)
+            session.commit()
+
+            return HttpResponseModel(status_code=201, message="Post created")
+    except Exception as e:
+        return HttpResponseModel(status_code=500, message=str(e))
+
+def load_feed(following: list[int]):
+    try:
+        if not following:
+            return HttpResponseModel(status_code=200, message="User does not follow anyone", data=[])
+
+        with Session(postgresql_engine) as session:
+            statement = (
+                select(Post)
+                .join(User, User.id == Post.user_id)
+                .where(Post.user_id.in_(following)) 
+                .order_by(Post.date_time.desc())
+            )
+            posts = session.execute(statement).fetchall()
+
+            if not posts:
+                return HttpResponseModel(status_code=404, message="No posts were found")
+
+            result = []
+            for p in posts:
+                p = p.Post
+                post = PostPydantic(id=p.id,
+                                    user_id=p.user_id,
+                                    text=p.text,
+                                    date_time=p.date_time).model_dump()
+                result.append(post)
+
+            return HttpResponseModel(status_code=200,
+                                     message="Posts found",
+                                     data=result)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))

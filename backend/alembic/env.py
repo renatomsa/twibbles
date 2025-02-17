@@ -7,6 +7,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from model.sqlalchemy.base import Base
+from model.sqlalchemy import post
 from model.sqlalchemy import user
 from model.sqlalchemy import following
 from model.sqlalchemy import follow_requests
