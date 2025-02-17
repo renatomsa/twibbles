@@ -1,13 +1,10 @@
-from typing import TYPE_CHECKING
-from sqlalchemy import String, DateTime
-from sqlalchemy import ForeignKey
-from model.sqlalchemy.base import Base
-
-from sqlalchemy.orm import Mapped, relationship
-from sqlalchemy.orm import mapped_column
-
 from datetime import datetime as dt
 from datetime import timezone
+from typing import TYPE_CHECKING
+
+from model.sqlalchemy.base import Base
+from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from model.sqlalchemy.comment import Comment
@@ -20,4 +17,6 @@ class Post(Base):
     text: Mapped[str] = mapped_column(String(280), nullable=False)
     date_time: Mapped[dt] = mapped_column(DateTime, default=dt.now(timezone.utc), nullable=False)
 
-    comments : Mapped["Comment"] = relationship("Comment", back_populates="user")
+    requester: Mapped["User"] = relationship(
+        "User", foreign_keys=[user_id]
+    )
