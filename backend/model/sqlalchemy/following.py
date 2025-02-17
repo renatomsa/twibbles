@@ -1,3 +1,4 @@
+from model.sqlalchemy.user import User
 from model.sqlalchemy.base import Base
 from typing import Optional, List
 from sqlalchemy.orm import Mapped

@@ -35,7 +35,7 @@ def get_posts(user_id: int):
                                      data=result)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
-    
+
 def delete_post(user_id: int, post_id: int):
     try:
         with Session(postgresql_engine) as session:
