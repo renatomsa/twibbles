@@ -70,16 +70,16 @@ def not_requested(context, follower_id, followed_id, client):
     # check for pending requests
     get_pending_requests = client.get(f"/follow/{followed_id}/follow_requests_as_requested").json()
     print("LOG SECOND_SCENARIO looking for requests ", get_pending_requests)
-    pending_requests = get_pending_requests.get("data", None)
+    pending_requests = get_pending_requests.get("data", [])
 
-    if pending_requests:
-        for request in pending_requests:
-            if request["requester_id"] == follower_id:
-                # send reject request to the database to guarantee
-                print("LOG rejecting request")
-                reject_response = client.post(f"/follow/{follower_id}/reject_request/{followed_id}").json()
-                assert reject_response["status_code"] in (200, 400), f"Failed to reject request from user with id {follower_id}"
-                break
+    print("LOG pending requests DATA", pending_requests)
+    for request in pending_requests:
+        if request["requester_id"] == follower_id:
+            # send reject request to the database to guarantee
+            print("LOG rejecting request")
+            reject_response = client.post(f"/follow/{follower_id}/reject_request/{followed_id}").json()
+            assert reject_response["status_code"] in (200, 400), f"Failed to reject request from user with id {follower_id}"
+            break
 
 
 @when(parsers.parse('Uma requisição "POST" for enviada para "/follow/{follower_id:d}/follow/{followed_id:d}" 2'))
