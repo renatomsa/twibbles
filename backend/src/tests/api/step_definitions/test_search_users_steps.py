@@ -16,7 +16,6 @@ def ensure_users_exist(context, name1, name2, id1, id2):
 def send_get_request_scenario1(context, endpoint, client):
     response = client.get(endpoint)
     context["response"] = response.json()
-    print(context["response"])
 
 
 @then(parsers.parse('o status da resposta deve ser "{expected_status}" 1'))
