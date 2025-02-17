@@ -1,16 +1,10 @@
-from logging.config import fileConfig
 import os
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from logging.config import fileConfig
 
 from alembic import context
-
+from model.sqlalchemy import comment, follow_requests, following, post, user
 from model.sqlalchemy.base import Base
-from model.sqlalchemy import user
-from model.sqlalchemy import following
-from model.sqlalchemy import follow_requests
-from model.sqlalchemy import comment
+from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
