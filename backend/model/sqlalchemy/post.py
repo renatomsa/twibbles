@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class Post(Base):
     __tablename__ = "posts"
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user_account.id", ondelete="CASCADE"), nullable=False)
     text: Mapped[str] = mapped_column(String(280), nullable=False)
     date_time: Mapped[dt] = mapped_column(DateTime, default=dt.now(timezone.utc), nullable=False)
