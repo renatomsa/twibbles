@@ -62,3 +62,21 @@ def update_user_privacy(user_id: int, is_private: bool):
                                         message="User privacy updated")
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
+
+
+def delete_user(user_id: int):
+    try:
+        with Session(postgresql_engine) as session:
+            statement = select(User).where(User.id == user_id).limit(1)
+            user = session.execute(statement).scalars().first()
+
+            if user is None:
+                return HttpResponseModel(status_code=404, message="User not found")
+
+            session.delete(user)
+            session.commit()
+
+            return HttpResponseModel(status_code=200,
+                                     message="User deleted")
+    except Exception as e:
+        return HttpResponseModel(status_code=500, message=str(e))

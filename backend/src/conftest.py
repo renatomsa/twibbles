@@ -4,7 +4,7 @@ import pytest
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 
-load_dotenv(dotenv_path="backend\credentials.env")
+load_dotenv(dotenv_path="backend\\credentials.env")
 
 from src.main import app
 
