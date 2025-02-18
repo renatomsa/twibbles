@@ -1,5 +1,5 @@
 import src.service.impl.user_service as user_service
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from src.schemas.response import HttpResponseModel
 from model.pydantic.user import CreateUser
 
@@ -31,6 +31,6 @@ def delete_user(user_id: int):
 
 
 @api.post("/create_user", response_model=HttpResponseModel)
-def create_user(user_data: CreateUser):
+def create_user(user_data: CreateUser = Depends()):
     create_user_response = user_service.create_user(user_data)
     return create_user_response

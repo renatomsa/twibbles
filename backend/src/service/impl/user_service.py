@@ -46,7 +46,8 @@ def get_users_by_substring(substring: str):
                                      data=users)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
-    
+
+
 def update_user_privacy(user_id: int, is_private: bool):
     try:
         with Session(postgresql_engine) as session:
