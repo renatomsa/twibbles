@@ -5,8 +5,8 @@ from model.pydantic.user import User as UserPydantic
 
 from model.sqlalchemy.post import Post
 from model.pydantic.post import Post as PostPydantic
-
-from model.sqlalchemy.following import Following
+from model.pydantic.post import CreatePost as CreatePostPydantic
+from src.service.impl import follow_service
 
 from src.schemas.response import HttpResponseModel
 
@@ -105,8 +105,10 @@ def load_feed(following: list[int]):
                                     date_time=p.date_time).model_dump()
                 result.append(post)
 
-            return HttpResponseModel(status_code=200,
-                                     message="Posts found",
-                                     data=result)
+            return HttpResponseModel(
+                status_code=200,
+                message="Posts found",
+                data=post_list
+            )
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))

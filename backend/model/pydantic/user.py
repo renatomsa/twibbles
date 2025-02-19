@@ -11,3 +11,12 @@ class User(BaseModel):
     email: Optional[str] = None
     is_private: Optional[bool] = None
     bio: Optional[str] = None
+
+
+class CreateUser(BaseModel):
+    user_name: str
+    email: str
+    password: str
+    is_private: bool
+    profile_img_path: Optional[str] = None
+    bio: Optional[str] = None
