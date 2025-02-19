@@ -7,8 +7,11 @@ api = APIRouter()
 
 
 @api.get("/{user_id}/posts", response_model=HttpResponseModel)
-def get_posts(user_id : int):
-    get_posts_response = post_service.get_posts(user_id)
+def get_posts(user_id : int, sort_by_comment : bool ):
+    if not sort_by_comment:
+        get_posts_response = post_service.get_posts(user_id)
+    else:
+        get_posts_response = post_service.get_posts_sorted_by_comment(user_id)
     return get_posts_response
 
 
@@ -19,9 +22,9 @@ def delete_post(user_id : int, post_id : int):
 
 
 @api.get("/{user_id}/dashboard", response_model=HttpResponseModel)
-def get_dashboard(user_id : int, metric : str, period : str):
-    get_dashboard_response = post_service.get_dashboard(user_id, metric, period)
-    return get_dashboard_response
+def get_dashboard_data(user_id : int, period : int):
+    get_dashboard_data_response = post_service.get_dashboard_data(user_id, period)
+    return get_dashboard_data_response
 
 
 @api.get("/location/{location}", response_model=HttpResponseModel)
