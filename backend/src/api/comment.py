@@ -5,7 +5,7 @@ from model.pydantic.comment import CommentCreate
 
 api = APIRouter()
 
-@api.get("/{post_id}", response_model=HttpResponseModel)
+@api.get("/post/{post_id}", response_model=HttpResponseModel)
 def get_comments_for_post(post_id: int):
     response = comment_service.get_comments_by_post_id(post_id)
     return response
