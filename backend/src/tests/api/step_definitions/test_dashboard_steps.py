@@ -47,7 +47,7 @@ def comments_exist(db_session, context):
     db_session.add(comment)
     db_session.commit()
 
-@when(parsers.parse('o sistema recebe uma requisição GET "/post/{user_id:d}/dashboard" com parameto de período igual a "{days:d}" dias'))
+@when(parsers.parse('o sistema recebe uma requisição GET "/post/{user_id:d}/dashboard" com parâmetro de período igual a "{days:d}" dias'))
 def send_get_request(context, user_id, client, days):
     response = client.get(f"/post/{user_id}/dashboard", params={"period":days}).json()
     context["response"] = response
@@ -85,7 +85,7 @@ def no_comments(db_session, context, days):
     db_session.execute(text("DELETE FROM comments C WHERE C.post_id IN (SELECT P.id FROM posts P WHERE P.user_id = :user_id)"), {"user_id": context["user_id"]})
     db_session.commit()
 
-@when(parsers.parse('o sistema recebe uma requisição GET "/post/{user_id:d}/dashboard" com parâmeto de período igual a "{days:d}" dias'))
+@when(parsers.parse('o sistema recebe uma requisição GET "/post/{user_id:d}/dashboard" com parâmetro de período igual a "{days:d}" dias'))
 def get_dashboard_request(context, user_id, days, client):
     response = client.get(f"/post/{user_id}/dashboard", params={"period":days}).json()
     context["response"] = response

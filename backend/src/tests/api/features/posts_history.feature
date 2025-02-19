@@ -1,6 +1,6 @@
 Feature: Histórico de postagens
 
-    Scenario: Exclusão de uma postagem (serviço)
+    Scenario: Exclusão de uma postagem
         Given O sistema possui a postagem com ID "1" criada pelo usuário com ID "7" 
         When O usuário envia uma requisição DELETE para a rota "/post/7/posts/1" 
         Then O sistema não possui a postagem "1" criada pelo usuário com ID "7" 
