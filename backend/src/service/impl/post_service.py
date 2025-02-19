@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from model.sqlalchemy.user import User
 from model.sqlalchemy.post import Post
 from model.pydantic.post import Post as PostPydantic
+from model.pydantic.post import CreatePost as CreatePostPydantic
+from src.service.impl import follow_service
 from model.sqlalchemy.comment import Comment
 from model.sqlalchemy.following import Following as Following
 from datetime import datetime, timedelta
@@ -147,6 +149,57 @@ def get_posts_by_hashtag(hashtag: str) -> HttpResponseModel:
                 message="Posts found",
                 data=post_list
             )
+    except Exception as e:
+        return HttpResponseModel(
+            status_code=500,
+            message=str(e)
+        )
+
+
+def create_post(user_id: int, data: dict) -> HttpResponseModel:
+    try:
+        with Session(postgresql_engine) as session:
+            post = Post(user_id=user_id,
+                        text=data["text"],
+                        location=data["location"],
+                        hashtags=data["hashtags"])
+            session.add(post)
+            session.commit()
+            session.refresh(post)
+
+            post = PostPydantic(id=post.id,
+                                user_id=post.user_id,
+                                text=post.text,
+                                location=post.location,
+                                hashtags=post.hashtags,
+                                date_time=post.date_time
+                                ).model_dump()
+            return HttpResponseModel(
+                status_code=201,
+                message="Post created",
+                data=post
+            )
+    except Exception as e:
+        return HttpResponseModel(
+            status_code=500,
+            message=str(e)
+        )
+
+
+def get_feed(user_id: int) -> HttpResponseModel:
+    try:
+        following = follow_service.get_following(user_id).data
+        posts_list = []
+        for user in following:
+            posts_list += get_posts(user["id"]).data
+
+        posts_list.sort(key=lambda x: x["date_time"], reverse=True)
+
+        return HttpResponseModel(
+            status_code=200,
+            message="Feed retrieved successfully",
+            data=posts_list
+        )
     except Exception as e:
         return HttpResponseModel(
             status_code=500,

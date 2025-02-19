@@ -1,4 +1,5 @@
 from model.pydantic.user import User as UserPydantic
+from model.pydantic.user import CreateUser
 from model.sqlalchemy.user import User
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -45,7 +46,8 @@ def get_users_by_substring(substring: str):
                                      data=users)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
-    
+
+
 def update_user_privacy(user_id: int, is_private: bool):
     try:
         with Session(postgresql_engine) as session:
@@ -60,5 +62,41 @@ def update_user_privacy(user_id: int, is_private: bool):
 
             return HttpResponseModel(status_code=200,
                                         message="User privacy updated")
+    except Exception as e:
+        return HttpResponseModel(status_code=500, message=str(e))
+
+
+def delete_user(user_id: int):
+    try:
+        with Session(postgresql_engine) as session:
+            statement = select(User).where(User.id == user_id).limit(1)
+            user = session.execute(statement).scalars().first()
+
+            if user is None:
+                return HttpResponseModel(status_code=404, message="User not found")
+
+            session.delete(user)
+            session.commit()
+
+            return HttpResponseModel(status_code=200,
+                                     message="User deleted")
+    except Exception as e:
+        return HttpResponseModel(status_code=500, message=str(e))
+
+
+def create_user(user_data: CreateUser):
+    try:
+        with Session(postgresql_engine) as session:
+            user = User(user_name=user_data.user_name,
+                        email=user_data.email,
+                        password=user_data.password,
+                        is_private=user_data.is_private,
+                        profile_img_path=user_data.profile_img_path,
+                        bio=user_data.bio)
+            session.add(user)
+            session.commit()
+
+            return HttpResponseModel(status_code=201,
+                                     message="User created")
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
