@@ -55,55 +55,55 @@ def delete_post(user_id: int, post_id: int):
                                      message="Post deleted")
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
-
-def get_posts_by_location(location: str) -> HttpResponseModel:
+    
+def post_post(post_id: int, text: str):
     try:
+        if len(text.strip()) == 0:
+            return HttpResponseModel(status_code=400, message="Post text cannot be empty")
+        
+        if len(text) > 280:
+            return HttpResponseModel(status_code=400, message="Post text cannot exceed 280 characters")
+
         with Session(postgresql_engine) as session:
-            stmt = (
-                select(Post)
-                .where(Post.location == location)
-                .order_by(Post.date_time.desc())
-            )
-            posts = session.execute(stmt).scalars().all()
+            statement = select(User).where(User.id == post_id)
+            user = session.execute(statement).scalars().first()
 
-            if not posts:
-                return HttpResponseModel(
-                    status_code=404,
-                    message="No posts found for this location"
-                )
+            if user is None:
+                return HttpResponseModel(status_code=404, message="User not found")
 
-            post_list = [PostPydantic.model_validate(p) for p in posts]
+            post = Post(user_id=post_id, text=text)
+            session.add(post)
+            session.commit()
 
-            return HttpResponseModel(
-                status_code=200,
-                message="Posts found",
-                data=post_list
-            )
+            return HttpResponseModel(status_code=200, message="Post created")
     except Exception as e:
-        return HttpResponseModel(
-            status_code=500,
-            message=str(e)
-        )
+        return HttpResponseModel(status_code=500, message=str(e))
 
-
-def get_posts_by_hashtag(hashtag: str) -> HttpResponseModel:
+def load_feed(following: list[int]):
     try:
+        if not following:
+            return HttpResponseModel(status_code=200, message="User does not follow anyone", data=[])
+
         with Session(postgresql_engine) as session:
-            # Exemplo de busca por substring (caso 'hashtags' armazene "#foo #bar #baz")
-            stmt = (
+            statement = (
                 select(Post)
-                .where(Post.hashtags.ilike(f"%{hashtag}%"))
+                .join(User, User.id == Post.user_id)
+                .where(Post.user_id.in_(following)) 
                 .order_by(Post.date_time.desc())
             )
-            posts = session.execute(stmt).scalars().all()
+            posts = session.execute(statement).fetchall()
 
             if not posts:
-                return HttpResponseModel(
-                    status_code=404,
-                    message="No posts found for this hashtag"
-                )
+                return HttpResponseModel(status_code=404, message="No posts were found")
 
-            post_list = [PostPydantic.model_validate(p) for p in posts]
+            result = []
+            for p in posts:
+                p = p.Post
+                post = PostPydantic(id=p.id,
+                                    user_id=p.user_id,
+                                    text=p.text,
+                                    date_time=p.date_time).model_dump()
+                result.append(post)
 
             return HttpResponseModel(
                 status_code=200,
@@ -162,7 +162,4 @@ def get_feed(user_id: int) -> HttpResponseModel:
             data=posts_list
         )
     except Exception as e:
-        return HttpResponseModel(
-            status_code=500,
-            message=str(e)
-        )
+        return HttpResponseModel(status_code=500, message=str(e))

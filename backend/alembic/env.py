@@ -4,6 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from model.sqlalchemy import comment, follow_requests, following, post, user
 from model.sqlalchemy.base import Base
+from model.sqlalchemy import post
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides

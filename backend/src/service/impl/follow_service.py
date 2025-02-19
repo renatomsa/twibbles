@@ -30,6 +30,18 @@ def get_following(user_id: int):
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
 
+def get_following_ids(user_id: int):
+    try:
+        with Session(postgresql_engine) as session:
+            statement = select(Following, User).join(User, Following.followed_id == User.id).where(Following.follower_id == user_id)
+            following = session.execute(statement).fetchall()
+            result = []
+            for f in following:
+                f = f.User
+                result.append(f.id)
+            return HttpResponseModel(status_code=200, message="Followed users retrieved successfully", data=result)
+    except Exception as e:
+        return HttpResponseModel(status_code=500, message=str(e))
 
 def get_followers(user_id: int):
     try:
