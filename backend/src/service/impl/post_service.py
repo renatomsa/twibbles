@@ -31,7 +31,7 @@ def get_posts(user_id: int):
                 post = PostPydantic(id=p.id,
                                     user_id=p.user_id,
                                     text=p.text,
-                                    date=p.date_time).model_dump()
+                                    date_time=p.date_time).model_dump()
                 result.append(post)
 
             return HttpResponseModel(status_code=200,
@@ -58,7 +58,7 @@ def get_posts_sorted_by_comment(user_id: int):
                                     id=p.post_id,
                                     user_id=user_id,
                                     text=p.text,
-                                    date=p.date_time).model_dump()
+                                    date_time=p.date_time).model_dump()
                 result_posts.append(post)
                 result_comments.append(p.comment_count)
     

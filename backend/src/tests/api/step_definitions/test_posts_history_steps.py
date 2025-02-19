@@ -65,7 +65,6 @@ def verify_post_deleted(context, post_id):
     with Session(postgresql_engine) as session:
         stmt = select(Post, User).join(Post, Post.user_id == User.id).where(Post.id == post_id)
         post = session.execute(stmt).scalars().first()
-    print(context["response"])
     assert post is None, "The post was not deleted"
     assert context["response"]["status_code"] == 200
 
@@ -103,13 +102,14 @@ def verify_posts_existence(context, user_id, post1_id, post2_id, post3_id, db_se
 def get_first_posts(client, context, user_id):
    response = client.get(f"/post/{user_id}/posts", params={"sort_by_comment":False}).json()
    context["response"] = response
+   print(response)
 
 @then(parsers.parse('A resposta contém a postagem "{post1_id:d}" com data "{date1}", seguida da postagem "{post2_id:d}" com data "{date2}"'))
 def check_response(context, date1, date2, post1_id, post2_id):
     response_data = context["response"]['data']
     response_data = response_data[:2]
-    response_date1 = response_data[0]['date']
-    response_date2 = response_data[1]['date']
+    response_date1 = response_data[0]['date_time']
+    response_date2 = response_data[1]['date_time']
     formatted_date1 = datetime.fromisoformat(response_date1).strftime('%d/%m/%Y')
     formatted_date2 = datetime.fromisoformat(response_date2).strftime('%d/%m/%Y')
     assert context["response"]["status_code"] == 200
