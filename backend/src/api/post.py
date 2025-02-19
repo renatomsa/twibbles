@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from src.schemas.response import HttpResponseModel
 import src.service.impl.post_service as post_service
 from model.pydantic.post import CreatePost
@@ -27,14 +27,13 @@ def get_dashboard_data(user_id : int, period : int):
     return get_dashboard_data_response
 
 
-@api.get("/location/{location}", response_model=HttpResponseModel)
-def explore_by_location(location: str):
+@api.get("/location", response_model=HttpResponseModel)
+def explore_by_location(location: str = Query(..., description="Localização para busca dos posts")):
     response = post_service.get_posts_by_location(location)
     return response
 
-
-@api.get("/hashtag/{hashtag}", response_model=HttpResponseModel)
-def explore_by_hashtag(hashtag: str):
+@api.get("/hashtag", response_model=HttpResponseModel)
+def explore_by_hashtag(hashtag: str = Query(..., description="Hashtag para busca dos posts")):
     response = post_service.get_posts_by_hashtag(hashtag)
     return response
 
