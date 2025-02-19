@@ -2,10 +2,10 @@ from pytest_bdd import scenarios, given, when, then, parsers
 import pytest
 from sqlalchemy.orm import Session
 from sqlalchemy import select, text
-from model.sqlalchemy.post import Post  
+from model.sqlalchemy.post import Post
 from model.sqlalchemy.user import User
 from model.sqlalchemy.comment import Comment
-from src.engine import postgresql_engine 
+from src.engine import postgresql_engine
 from src.api.post import post_service
 from datetime import datetime, timedelta
 
@@ -16,7 +16,7 @@ scenarios("../features/dashboard.feature")
 def db_session():
     with Session(postgresql_engine) as session:
         yield session
-        session.rollback() 
+        session.rollback()
         session.close()
 
 @given(parsers.parse('Existe um usuário de ID "{user_id:d}"'))
@@ -37,7 +37,7 @@ def set_time_filter(context, days):
 @given(parsers.parse('existem comentários registrados nas postagens desse usuário ao longo dos últimos "{days:d}" dias'))
 def comments_exist(db_session, context):
     with Session(postgresql_engine) as session:
-        post = session.get(Post, 0) 
+        post = session.get(Post, 0)
         if post:
             post_service.delete_post(context["user_id"], 0)
     days_count = 5
@@ -53,12 +53,14 @@ def send_get_request(context, user_id, client, days):
     context["response"] = response
 
 @then(parsers.parse('o sistema retorna uma mensagem contendo o número de comentários do usuário ao longo dos últimos "{days}" dias'))
-def check_comment_count(context):
-    assert  context["response"], f"Expected comments but response was empty: {context["response"]}"
-    
+def check_comment_count(context, days):
+    response = context["response"]
+    assert context["response"], f'Expected comments but response was empty: {response}'
+
 @then(parsers.parse('o status da resposta é 200 OK'))
 def check_status_code(context):
-    assert context["response"]["status_code"] == 200, f"Expected 200, but got {context['response']["status_code"]}"
+    status = context["response"]["status_code"]
+    assert context["response"]["status_code"] == 200, f'Expected 200, but got {status}'
 
 
 # ------ Scenario 2 ------ #
@@ -90,9 +92,10 @@ def get_dashboard_request(context, user_id, days, client):
 
 @then(parsers.parse('o sistema retorna uma mensagem informando que o usuário não possui comentários ao longo dos últimos "{days:d}" dias'))
 def check_response_message(context, days):
-    assert context['response']['message'] == "No comments were found", f"Expected '{"No comments were found"}', but got '{context['response']['message']}'"
+    response = context['response']['message']
+    assert context['response']['message'] == "No comments were found", f'Expected No comments were found, but got {response}'
 
 @then(parsers.parse('o status da resposta é 404 NOT FOUND'))
 def check_status_code(context):
-    assert context["response"]["status_code"] == 404, f"Expected status 404 but got {context['response'].status_code}"
-
+    status = context['response'].status_code
+    assert context["response"]["status_code"] == 404, f'Expected status 404 but got {status}'
