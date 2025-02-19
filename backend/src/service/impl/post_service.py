@@ -1,26 +1,23 @@
 from src.engine import postgresql_engine
 from sqlalchemy.orm import Session
 from model.sqlalchemy.user import User
-
 from model.sqlalchemy.post import Post
 from model.pydantic.post import Post as PostPydantic
-
 from model.sqlalchemy.comment import Comment
-from model.pydantic.comment import CommentBase as CommentPydantic
-
 from model.sqlalchemy.following import Following as Following
-from model.pydantic.following import Following as FollowingPydantic
-
 from datetime import datetime, timedelta
-
 from src.schemas.response import HttpResponseModel
-
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, cast, Date, desc, delete
 
 def get_posts(user_id: int):
     try:
         with Session(postgresql_engine) as session:
-            statement = select(Post, User).join(User, User.id == Post.user_id).where(Post.user_id == user_id).order_by(Post.date_time.desc())
+            statement = (
+                select(Post, User)
+                .join(User, User.id == Post.user_id)
+                .where(Post.user_id == user_id)
+                .order_by(Post.date_time.desc())
+            )
             posts = session.execute(statement).fetchall()
 
             if posts is None:
@@ -32,7 +29,7 @@ def get_posts(user_id: int):
                 post = PostPydantic(id=p.id,
                                     user_id=p.user_id,
                                     text=p.text,
-                                    date_time=p.date_time).model_dump()
+                                    date=p.date_time).model_dump()
                 result.append(post)
 
             return HttpResponseModel(status_code=200,
@@ -40,11 +37,45 @@ def get_posts(user_id: int):
                                      data=result)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
+    
+def get_posts_sorted_by_comment(user_id: int):
+    try:
+        with Session(postgresql_engine) as session:
+            statement = (
+                select(Post.text, Post.date_time, Comment.post_id, func.count(Comment.id).label("comment_count"))
+                .join(Post, Post.id == Comment.post_id)
+                .where(Post.user_id == user_id)
+                .group_by(Comment.post_id, Post.text, Post.date_time)
+                .order_by(desc(func.count(Comment.id)))
+            )
+            posts = session.execute(statement).fetchall()
+            result_posts = []
+            result_comments = []
+            for p in posts:
+                post = PostPydantic(
+                                    id=p.post_id,
+                                    user_id=user_id,
+                                    text=p.text,
+                                    date=p.date_time).model_dump()
+                result_posts.append(post)
+                result_comments.append(p.comment_count)
+    
+            if posts is None:
+                return HttpResponseModel(status_code=404, message="No posts were found")
+            return HttpResponseModel(status_code=200,
+                                     message="Posts found",
+                                     data=(result_posts, result_comments))
+    except Exception as e:
+        return HttpResponseModel(status_code=500, message=str(e))
 
 def delete_post(user_id: int, post_id: int):
     try:
         with Session(postgresql_engine) as session:
-            statement = select(Post, User).join(User, User.id == Post.user_id).where(Post.id == post_id)
+            statement = (
+                select(Post, User)
+                .join(User, User.id == Post.user_id)
+                .where(Post.id == post_id)
+            )
             post = session.execute(statement).scalars().first()
 
             if post is None:
@@ -52,7 +83,8 @@ def delete_post(user_id: int, post_id: int):
 
             if post.user_id != user_id:
                 return HttpResponseModel(status_code=403, message="Unauthorized to delete post")
-
+            
+            session.execute(delete(Comment).where(Comment.post_id == post_id))
             session.delete(post)
             session.commit()
 
@@ -123,7 +155,7 @@ def get_posts_by_hashtag(hashtag: str) -> HttpResponseModel:
 
 
 def get_date_range(period):
-    end_date = datetime.today()
+    end_date = datetime.now()
     if period == 7:
         start_date = end_date - timedelta(days=7)
     elif period == 30:
@@ -135,37 +167,45 @@ def get_date_range(period):
 
     return start_date, end_date
 
-def get_dashboard_data(user_id: int, period: int):
+def get_dashboard_data(user_id: int, period: int) -> HttpResponseModel:
     start_date, end_date = get_date_range(period)
     try:
         with Session(postgresql_engine) as session:
-            # Calcular o número médio de comentários no intervalo de tempo
-            statement = select(func.avg(func.count(Comment.id))).join(Post, Post.id == Comment.post_id).where(Post.user_id == user_id, Comment.created_at.between(start_date, end_date)).group_by(Post.id)
-            comment_avg = session.execute(statement).scalar()
+            statement = select(func.count(Comment.id)).join(Post, Post.id == Comment.post_id).where(
+                Post.user_id == user_id,
+                Comment.created_at.between(start_date, end_date)
+            ).group_by(Post.id)
 
-            # Pegar todos os comentários nos posts de um usuário ao longo do tempo
+            comment_counts = session.execute(statement).scalars().all()
+            comment_avg = sum(comment_counts) / len(comment_counts) if len(comment_counts) > 0 else 0
+            if not comment_counts:
+                return HttpResponseModel(status_code=404, message="No comments were found")
+            
             statement = (
                 select(
-                    func.date(Comment.created_at).label("comment_date"), 
-                    func.count(Comment.id).label("comment_count") 
+                    cast(Comment.created_at, Date).label("comment_date"),  # Explicitly cast to Date
+                    func.count(Comment.id).label("comment_count")
                 )
-                .join(Post, Post.id == Comment.post_id)  
-                .where(and_(Post.user_id == user_id, Comment.created_at.between(start_date, end_date)))  # Filtrando posts do usuário
-                .group_by(func.date(Comment.created_at)) 
+                .join(Post, Post.id == Comment.post_id)
+                .where(
+                    and_(Post.user_id == user_id, Comment.created_at.between(start_date, end_date))
+                )
+                .group_by(cast(Comment.created_at, Date))
                 .order_by("comment_date")
             )
 
-            # Executar a query
             comments = session.execute(statement).all()
 
-            result = []
-            result.append(comment_avg)
-            for c in comments:            
-                if(c > 0):
-                    result.append(c)
+            result = [(c.comment_date, c.comment_count) for c in comments if c.comment_count > 0]
 
-            return HttpResponseModel(status_code=200,
-                                     message="Dashboard ready",
-                                     data=result)
+            if not result:
+                return HttpResponseModel(status_code=404, message="No comments were found")
+            
+            return HttpResponseModel(
+                status_code=200,
+                message="Dashboard ready",
+                data={"comment_avg": comment_avg, "comments": result}
+            )
+    
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
