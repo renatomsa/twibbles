@@ -97,5 +97,5 @@ def check_response_message(context, days):
 
 @then(parsers.parse('o status da resposta é 404 NOT FOUND'))
 def check_status_code(context):
-    status = context['response'].status_code
-    assert context["response"]["status_code"] == 404, f'Expected status 404 but got {status}'
+    status = context['response']["status_code"]
+    assert status == 404, f'Expected status 404 but got {status}'

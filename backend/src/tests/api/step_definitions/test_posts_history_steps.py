@@ -40,7 +40,7 @@ def create_test_post(user_id, post_id, db_session):
         
     # Caso o usuário não exista cria um usuário e uma postagem
     if(user is None):
-        user = User(id=user_id, user_name="Usuário Teste", password="password", email="user@example.com", is_private=False)
+        user = User(id=user_id, user_name="UsuárioTeste", password="password", email="macaco@example.com", is_private=False)
         db_session.add(user)
         db_session.commit()
         post = Post(id=post_id, user_id=user_id, text="description", date_time=datetime(2025, 7, 23))
@@ -80,7 +80,7 @@ def verify_user_existence(user_id, db_session):
         statement = select(User).where(User.id == user_id)
         user = session.execute(statement).scalars().first()
     if(user is None):
-        user = User(id=user_id, user_name="Usuário Teste", password="password", email="user@example.com", is_private=False)
+        user = User(id=user_id, user_name="UsuárioTeste", password="password", email="macaco@example.com", is_private=False)
         db_session.add(user)
         db_session.commit()
 
@@ -124,7 +124,7 @@ def verify_user_existence(user_id, db_session):
         statement = select(User).where(User.id == user_id)
         user = session.execute(statement).scalars().first()
     if(user is None):
-        user = User(id=user_id, user_name="Usuário Teste", password="password", email="user@example.com", is_private=False)
+        user = User(id=user_id, user_name="UsuárioTeste", password="password", email="macaco@example.com", is_private=False)
         db_session.add(user)
         db_session.commit()
 
