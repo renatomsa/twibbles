@@ -236,7 +236,7 @@ def get_dashboard_data(user_id: int, period: int) -> HttpResponseModel:
             
             statement = (
                 select(
-                    cast(Comment.created_at, Date).label("comment_date"),  # Explicitly cast to Date
+                    cast(Comment.created_at, Date).label("comment_date"), 
                     func.count(Comment.id).label("comment_count")
                 )
                 .join(Post, Post.id == Comment.post_id)

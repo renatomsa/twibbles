@@ -13,21 +13,9 @@ def given_post_1(context, post_id, user_name, user_id):
 
 @given(parsers.parse('nesse post existe um comentário de id {comment_id:d} criado pelo usuário de nome "{comment_user_name}" e id {comment_user_id:d} com conteúdo igual a "{comment_content}" 1'))
 def given_comment_1(context, comment_id, comment_user_id, comment_content):
-    # post_id = context["post_id"]
-    # payload = {
-    #     "content": comment_content,
-    #     "user_id": comment_user_id,
-    #     "post_id": post_id
-    # }
     context["content"] = comment_content,
     context["user_id"] = comment_user_id,
     context["comment_id"] = comment_id
-    # response = client.post(f"/comments/user/{comment_user_id}/post/{post_id}", json=payload)
-    # response_data = response.json()
-    # # Armazena os comentários criados em um dicionário no contexto
-    # if "comments" not in context:
-    #     context["comments"] = {}
-    # context["comments"][comment_id] = response_data["data"]
 
 @when(parsers.parse('uma requisição GET for enviada para "{endpoint}" 1'))
 def send_get_request_1(context, endpoint, client):

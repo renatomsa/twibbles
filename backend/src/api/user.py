@@ -34,3 +34,13 @@ def delete_user(user_id: int):
 def create_user(user_data: CreateUser = Depends()):
     create_user_response = user_service.create_user(user_data)
     return create_user_response
+
+@api.patch("/update_password/{user_id}/{password}", response_model=HttpResponseModel)
+def update_password(user_id: int, password: str):
+    update_user_response = user_service.update_password(user_id, password)
+    return update_user_response
+
+@api.patch("/update_profile/{user_id}/{user_name}/{profile_img_path}/{bio}", response_model=HttpResponseModel)
+def update_profile(user_id: int, user_name: str, profile_img_path: str, bio: str):
+    update_user_response = user_service.update_profile(user_id, user_name, profile_img_path, bio)
+    return update_user_response
