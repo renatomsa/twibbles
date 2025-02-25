@@ -102,7 +102,6 @@ def verify_posts_existence(context, user_id, post1_id, post2_id, post3_id, db_se
 def get_first_posts(client, context, user_id):
    response = client.get(f"/post/{user_id}/posts", params={"sort_by_comment":False}).json()
    context["response"] = response
-   print(response)
 
 @then(parsers.parse('A resposta contém a postagem "{post1_id:d}" com data "{date1}", seguida da postagem "{post2_id:d}" com data "{date2}"'))
 def check_response(context, date1, date2, post1_id, post2_id):
