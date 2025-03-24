@@ -40,7 +40,7 @@ def create_test_post(user_id, post_id, db_session):
         
     # Caso o usuário não exista cria um usuário e uma postagem
     if(user is None):
-        user = User(id=user_id, user_name="Usuário Teste", password="password", email="user@example.com", is_private=False)
+        user = User(id=user_id, user_name="UsuárioTeste", password="password", email="macaco@example.com", is_private=False)
         db_session.add(user)
         db_session.commit()
         post = Post(id=post_id, user_id=user_id, text="description", date_time=datetime(2025, 7, 23))
@@ -80,7 +80,7 @@ def verify_user_existence(user_id, db_session):
         statement = select(User).where(User.id == user_id)
         user = session.execute(statement).scalars().first()
     if(user is None):
-        user = User(id=user_id, user_name="Usuário Teste", password="password", email="user@example.com", is_private=False)
+        user = User(id=user_id, user_name="UsuárioTeste", password="password", email="macaco@example.com", is_private=False)
         db_session.add(user)
         db_session.commit()
 
@@ -102,7 +102,6 @@ def verify_posts_existence(context, user_id, post1_id, post2_id, post3_id, db_se
 def get_first_posts(client, context, user_id):
    response = client.get(f"/post/{user_id}/posts", params={"sort_by_comment":False}).json()
    context["response"] = response
-   print(response)
 
 @then(parsers.parse('A resposta contém a postagem "{post1_id:d}" com data "{date1}", seguida da postagem "{post2_id:d}" com data "{date2}"'))
 def check_response(context, date1, date2, post1_id, post2_id):
@@ -124,7 +123,7 @@ def verify_user_existence(user_id, db_session):
         statement = select(User).where(User.id == user_id)
         user = session.execute(statement).scalars().first()
     if(user is None):
-        user = User(id=user_id, user_name="Usuário Teste", password="password", email="user@example.com", is_private=False)
+        user = User(id=user_id, user_name="UsuárioTeste", password="password", email="macaco@example.com", is_private=False)
         db_session.add(user)
         db_session.commit()
 
