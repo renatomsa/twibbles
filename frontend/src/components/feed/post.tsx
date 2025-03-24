@@ -14,5 +14,6 @@ interface PostProps {
       </div>
     );
   };
-  
+
+
   export default Post;

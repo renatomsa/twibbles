@@ -1,23 +1,19 @@
-import Post from "./post";
+"use client";
+import { useState } from "react";
+import OwnPost from "./ownpost";
 
-const User = () => {
-    const postList = [
-        {
-            name: "Max Stenio",
-            text: "Matéria tá complicada, acho que vou ter que usar o modo estudo",
-        },
-        {
-            name: "Rodrigo Ladvocat",
-            text: "Bang Bang Skeet Skeet Skeet",
-        },
-        {
-            name: "JP",
-            text: "Eu sou de falar e não de fazer",
-        }
-    ];
+const Feed = () => {
+  const [posts, setPosts] = useState([
+    { id: 1, user_name: "Alice", post_text: "Hello World!" },
+    { id: 2, user_name: "Bob", post_text: "My first post!" },
+  ]);
 
-    return (
-        <div className="h-screen w-screen flex flex-col">
+  const handleDeletePost = (id: number) => {
+    setPosts(posts.filter(post => post.id !== id));
+  };
+
+  return (
+    <div className="h-screen w-screen flex flex-col">
             {/* Header */}
             <div className="h-[20%] w-full p-5 bg-indigo-600">
                 <h1 className="text-white text-3xl">User Header</h1>
@@ -32,9 +28,9 @@ const User = () => {
                     </div>
 
                     {/* Lista de Posts */}
-                    {postList.map((post, index) => (
+                    {posts.map((post, index) => (
                         <div key={index} className="w-[50%]">
-                            <Post user_name={post.name} post_text={post.text} />
+                            <OwnPost key={post.id} {...post} onDelete={handleDeletePost} />
                         </div>
                     ))}
                 </div>
@@ -43,4 +39,4 @@ const User = () => {
     );
 };
 
-export default User;
+export default Feed;
