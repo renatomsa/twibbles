@@ -8,7 +8,7 @@ const User = () => {
         },
         {
             name: "Rodrigo Ladvocat",
-            text: "Skit Skit Nigga",
+            text: "Bang Bang Skeet Skeet Skeet N",
         },
         {
             name: "JP",
