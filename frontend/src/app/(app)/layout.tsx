@@ -10,6 +10,9 @@ export default function AppLayout({
 }) {
   return (
     <html lang="pt-br">
+      <head>
+        <title>Twibbles</title>
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   )
