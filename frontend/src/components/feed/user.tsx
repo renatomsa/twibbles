@@ -1,4 +1,4 @@
-"use client"; // Marca este arquivo como um componente do cliente
+"use client";
 
 import { useState } from "react";
 import Post from "./post";
@@ -7,16 +7,16 @@ import CreatePost from "./createPost";
 const User = () => {
   const [postList, setPostList] = useState([
     {
-      name: "Max Stenio",
-      text: "Matéria tá complicada, acho que vou ter que usar o modo estudo",
+      name: "Rodrigo Ladvocat",
+      text: "Matéria tá complicada, quero ver o que a gente vai fazer",
     },
     {
       name: "Rodrigo Ladvocat",
-      text: "Bang Bang Skeet Skeet Skeet",
+      text: "A economia está muito boa, o ovo está barato",
     },
     {
       name: "JP",
-      text: "Eu sou de falar e não de fazer",
+      text: "Quero me demitir",
     },
   ]);
   
@@ -38,42 +38,31 @@ const User = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col">
-      {/* Header */}
-      <div className="h-[10%] w-full p-5 bg-cyan-900/90">
-        <h1 className="text-white text-3xl font-bold">Twibbles</h1>
-      </div>
-
-      {/* Body */}
-      <div className="flex-1 w-full p-5 bg-gray-400 overflow-auto">
-        <div className="w-full items-center justify-between flex flex-col space-y-4">
-          {/* Botão "Write" */}
-          <div className="absolute ml-[85%] bottom-10">
-            <div
-              onClick={toggleFormVisibility}
-              className="cursor-pointer p-4 bg-cyan-900/80 text-white rounded-xl shadow-lg hover:scale-110"
-            >
-              Write
-            </div>
-          </div>
-
-          {/* Exibe o formulário de criação de post */}
-          {isFormVisible && (
-            <div className="w-[50%] mb-4">
-              <CreatePost userName="Novo Usuário" onPostSubmit={handlePostSubmit} />
-            </div>
-          )}
-
-          {/* Lista de Posts */}
-          <div className="w-[50%] ">
-            {postList.map((post, index) => (
-              <div key={index} className="m-4">
-                <Post user_name={post.name} post_text={post.text} />
-              </div>
-            ))}
-          </div>
+    <div className="min-h-screen flex flex-col bg-gray-100 pt-16">
+      <main className="flex-1 max-w-2xl mx-auto w-full py-4 px-4">
+        <div className="fixed bottom-8 right-8">
+          <button 
+            onClick={toggleFormVisibility}
+            className="bg-cyan-900 text-white p-4 rounded-lg shadow-lg hover:bg-cyan-800 transition-colors"
+          >
+            Write
+          </button>
         </div>
-      </div>
+
+        {isFormVisible && (
+          <div className="mb-6 p-4">
+            <CreatePost userName="Novo Usuário" onPostSubmit={handlePostSubmit} />
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {postList.map((post, index) => (
+            <div key={index} className="mb-4">
+              <Post user_name={post.name} post_text={post.text} />
+            </div>
+          ))}
+        </div>
+      </main>
     </div>
   );
 };
