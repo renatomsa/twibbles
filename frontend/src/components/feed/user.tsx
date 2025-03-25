@@ -39,10 +39,6 @@ const User = () => {
 
   return (
     <div className="h-screen w-screen flex flex-col">
-      {/* Header */}
-      <div className="h-[10%] w-full p-5 bg-cyan-900/90">
-        <h1 className="text-white text-3xl font-bold">Twibbles</h1>
-      </div>
 
       {/* Body */}
       <div className="flex-1 w-full p-5 bg-gray-400 overflow-auto">

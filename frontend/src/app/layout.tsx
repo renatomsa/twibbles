@@ -17,6 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
+      <head>
+        <title>
+          Twibbles
+        </title>
+      </head>
       <body>
         <Navbar />
         <main className="pt-16">
