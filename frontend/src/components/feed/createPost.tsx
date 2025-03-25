@@ -44,7 +44,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ userName, onPostSubmit }) => {
         placeholder="Escreva seu post..."
         rows={5}
         style={{ width: "100%", resize: "none" }}
-        className="bg-gray-500/30 text-gray-100 font-bold p-4 rounded-lg"  // Aumentei o valor de p-2 para p-4
+        className="bg-gray-500/30 text-gray-100 font-bold p-4 rounded-lg"  
       />
         {error && <p style={{ color: "red" }}>{error}</p>}
         <button

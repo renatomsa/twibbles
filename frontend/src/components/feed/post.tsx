@@ -5,7 +5,7 @@ interface PostProps {
   
   const Post: React.FC<PostProps> = ({ user_name, post_text }) => {
     return (
-    <div className="border border-gray-800 p-4 rounded-lg shadow-md bg-gray-700/80 text-gray-100">
+    <div className="border border-gray-800 p-4 rounded-lg shadow-md bg-gray-700/80 text-gray-100 cursor-pointer">
         <h3 className="font-bold text-lg">{user_name}</h3>
         <div className="p-0.5 my-4 mr-0.5 border-solid border-r-2 bg-gray-900 rounded-lg"></div>
         <div className="bg-gray-500/30 p-4 rounded-lg text-ellipsis">
