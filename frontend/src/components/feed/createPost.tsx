@@ -38,14 +38,14 @@ const CreatePost: React.FC<CreatePostProps> = ({ userName, onPostSubmit }) => {
       </div>
       <div className="p-0.5 my-4 mr-0.5 border-solid border-r-2 bg-gray-900 rounded-lg"></div>
       <form onSubmit={handleSubmit}>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Escreva seu post..."
-          rows={5}
-          style={{ width: "100%", resize: "none" }}
-          className="bg-gray-500/30 text-gray-100 font-bold p-2 rounded-lg"
-        />
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Escreva seu post..."
+        rows={5}
+        style={{ width: "100%", resize: "none" }}
+        className="bg-gray-500/30 text-gray-100 font-bold p-4 rounded-lg"  // Aumentei o valor de p-2 para p-4
+      />
         {error && <p style={{ color: "red" }}>{error}</p>}
         <button
           type="submit"
