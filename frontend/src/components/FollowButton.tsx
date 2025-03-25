@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { apiService } from '../lib/api';
 
 interface FollowRequest {
-  requested_id: string;
+  requested_id: number;
 }
 
 interface FollowButtonProps {
-  currentUserId: string;
-  profileUserId: string;
+  currentUserId: number;
+  profileUserId: number;
   isPrivateAccount: boolean;
 }
 

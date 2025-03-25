@@ -2,11 +2,11 @@ import { apiService } from '@/lib/api';
 import React, { useEffect, useState } from 'react';
 
 interface FollowRequestsTabProps {
-  userId: string;
+  userId: number;
 }
 
 interface FollowRequest {
-  requester_id: string;
+  requester_id: number;
   requester_username: string;
   profile_img_path: string;
 }
@@ -31,7 +31,7 @@ const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
     }
   };
 
-  const handleAccept = async (requesterId: string) => {
+  const handleAccept = async (requesterId: number) => {
     try {
       await apiService.post(`/follow/${requesterId}/accept_request/${userId}`, {});
       // Remove from list after accepting
@@ -41,7 +41,7 @@ const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
     }
   };
 
-  const handleReject = async (requesterId: string) => {
+  const handleReject = async (requesterId: number) => {
     try {
       await apiService.post(`/follow/${requesterId}/reject_request/${userId}`, {});
       // Remove from list after rejecting
@@ -66,7 +66,7 @@ const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
             <li key={request.requester_id} className="flex items-center justify-between p-3 border rounded">
               <div className="flex items-center">
                 <img 
-                  src={request.profile_img_path || '/default-avatar.png'} 
+                  src={request.profile_img_path} 
                   alt="User avatar" 
                   className="w-10 h-10 rounded-full mr-3"
                 />

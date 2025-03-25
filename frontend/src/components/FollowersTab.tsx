@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react';
 import FollowButton from './FollowButton';
 
 interface FollowersTabProps {
-  userId: string;
-  currentUserId: string;
+  userId: number;
+  currentUserId: number;
 }
 
 const FollowersTab: React.FC<FollowersTabProps> = ({ userId, currentUserId }) => {
@@ -43,7 +43,7 @@ const FollowersTab: React.FC<FollowersTabProps> = ({ userId, currentUserId }) =>
             <li key={follower.id} className="flex items-center justify-between p-3 border rounded">
               <div className="flex items-center">
                 <img 
-                  src={follower.profile_img_path || '/default-avatar.png'} 
+                  src={follower.profile_img_path} 
                   alt="User avatar" 
                   className="w-10 h-10 rounded-full mr-3"
                 />

@@ -71,7 +71,7 @@ export default function SearchPage() {
                             >
                                 <div className="relative w-12 h-12 rounded-full overflow-hidden">
                                     <Image
-                                        src={user.profile_img_path || '/default-avatar.png'}
+                                        src={user.profile_img_path}
                                         alt={`Foto de ${user.user_name}`}
                                         fill
                                         className="object-cover"

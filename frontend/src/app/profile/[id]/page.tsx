@@ -8,10 +8,10 @@ import { User } from '@/types/user';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
-async function getInitialData() {
+async function getInitialData(): Promise<number> {
     const response = await fetch('/api/auth/current-user');
     const { userId } = await response.json();
-    return userId;
+    return Number(userId);
 }
 
 export default function ProfilePage({ params }: { params: { id: string } }) {
@@ -24,7 +24,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
         const fetchProfile = async () => {
             try {
                 const currentUserId = await getInitialData();
-                const profileId = params.id;
+                const profileId = Number(params.id);
 
                 const response = await apiService.get<User>(`user/get_user_by_id/${profileId}`);
                 setProfile(response.data);
