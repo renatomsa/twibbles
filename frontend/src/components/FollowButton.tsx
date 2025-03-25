@@ -1,16 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import { User } from '@/types/user';
+import React, { useEffect, useState } from 'react';
 import { apiService } from '../lib/api';
+
+interface FollowRequest {
+  requested_id: number;
+}
 
 interface FollowButtonProps {
   currentUserId: number;
   profileUserId: number;
   isPrivateAccount: boolean;
+  onStatusChange?: () => void;
 }
 
 const FollowButton: React.FC<FollowButtonProps> = ({ 
   currentUserId, 
   profileUserId,
-  isPrivateAccount 
+  isPrivateAccount,
+  onStatusChange 
 }) => {
   const [relationship, setRelationship] = useState<'none' | 'following' | 'requested'>('none');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,11 +29,11 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   const checkRelationship = async () => {
     try {
       // Get list of who current user is following
-      const followingResponse = await apiService.get(`/follow/${currentUserId}/following`);
+      const followingResponse = await apiService.get<User[]>(`/follow/${currentUserId}/following`);
       
       // Check if profile user is in the following list
       const isFollowing = followingResponse.data.some(
-        (user: any) => user.id === profileUserId
+        (user: User) => user.id === profileUserId
       );
       
       if (isFollowing) {
@@ -36,9 +43,9 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       
       // If not following and profile is private, check if request was sent
       if (isPrivateAccount) {
-        const requestsResponse = await apiService.get(`/follow/${currentUserId}/follow_requests_as_requester`);
+        const requestsResponse = await apiService.get<FollowRequest[]>(`/follow/${currentUserId}/follow_requests_as_requester`);
         const requestSent = requestsResponse.data.some(
-          (request: any) => request.requested_id === profileUserId
+          (request: FollowRequest) => request.requested_id === profileUserId
         );
         
         setRelationship(requestSent ? 'requested' : 'none');
@@ -54,20 +61,18 @@ const FollowButton: React.FC<FollowButtonProps> = ({
     setIsLoading(true);
     try {
       if (relationship === 'following') {
-        // Unfollow user
         await apiService.post(`/follow/${currentUserId}/unfollow/${profileUserId}`, {});
         setRelationship('none');
       } 
       else if (relationship === 'requested') {
-        // Cancel request - we need to use unfollow for this based on the API
         await apiService.post(`/follow/${currentUserId}/unfollow/${profileUserId}`, {});
         setRelationship('none');
       }
       else {
-        // Follow or request to follow
         await apiService.post(`/follow/${currentUserId}/follow/${profileUserId}`, {});
         setRelationship(isPrivateAccount ? 'requested' : 'following');
       }
+      onStatusChange?.();
     } catch (error) {
       console.error('Error updating follow status:', error);
     } finally {

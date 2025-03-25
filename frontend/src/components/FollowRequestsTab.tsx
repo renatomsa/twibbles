@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { apiService } from '../lib/api';
+import { apiService } from '@/lib/api';
+import React, { useEffect, useState } from 'react';
 
 interface FollowRequestsTabProps {
   userId: number;
 }
 
+interface FollowRequest {
+  requester_id: number;
+  requested_id: number;
+  requester: {
+    id: number;
+    user_name: string;
+    profile_img_path: string;
+  };
+}
+
 const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<FollowRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,7 +26,7 @@ const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
   const fetchFollowRequests = async () => {
     try {
       setLoading(true);
-      const response = await apiService.get(`/follow/${userId}/follow_requests_as_requested`);
+      const response = await apiService.get<FollowRequest[]>(`/follow/${userId}/follow_requests_as_requested`);
       setRequests(response.data);
     } catch (error) {
       console.error('Error fetching follow requests:', error);
@@ -60,11 +70,11 @@ const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
             <li key={request.requester_id} className="flex items-center justify-between p-3 border rounded">
               <div className="flex items-center">
                 <img 
-                  src={request.requester_avatar || '/default-avatar.png'} 
+                  src={request.requester.profile_img_path} 
                   alt="User avatar" 
                   className="w-10 h-10 rounded-full mr-3"
                 />
-                <span>{request.requester_username}</span>
+                <span>{request.requester.user_name}</span>
               </div>
               <div className="flex space-x-2">
                 <button 

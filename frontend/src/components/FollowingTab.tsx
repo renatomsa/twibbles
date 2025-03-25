@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { apiService } from '../lib/api';
+import { apiService } from '@/lib/api';
+import { User } from '@/types/user';
+import React, { useEffect, useState } from 'react';
 import FollowButton from './FollowButton';
 
 interface FollowingTabProps {
@@ -8,7 +9,7 @@ interface FollowingTabProps {
 }
 
 const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) => {
-  const [following, setFollowing] = useState<any[]>([]);
+  const [following, setFollowing] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,13 +19,17 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
   const fetchFollowing = async () => {
     try {
       setLoading(true);
-      const response = await apiService.get(`/follow/${userId}/following`);
+      const response = await apiService.get<User[]>(`/follow/${userId}/following`);
       setFollowing(response.data);
     } catch (error) {
       console.error('Error fetching following:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFollowStatusChange = () => {
+    fetchFollowing(); // Recarrega a lista quando o status de follow muda
   };
 
   if (loading) {
@@ -42,7 +47,7 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
             <li key={user.id} className="flex items-center justify-between p-3 border rounded">
               <div className="flex items-center">
                 <img 
-                  src={user.avatar || '/default-avatar.png'} 
+                  src={user.profile_img_path} 
                   alt="User avatar" 
                   className="w-10 h-10 rounded-full mr-3"
                 />
@@ -53,6 +58,7 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
                   currentUserId={currentUserId}
                   profileUserId={user.id}
                   isPrivateAccount={user.is_private}
+                  onStatusChange={handleFollowStatusChange}
                 />
               )}
             </li>
