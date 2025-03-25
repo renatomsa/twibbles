@@ -19,7 +19,7 @@ export function Navbar() {
                             href="/" 
                             className="text-xl font-bold text-gray-800"
                         >
-                            RedeSocial
+                            Twibbles
                         </Link>
                     </div>
 
@@ -44,7 +44,7 @@ export function Navbar() {
                         </Link>
                         
                         <Link 
-                            href="/profile/709" 
+                            href="/profile" 
                             className="flex items-center space-x-2"
                         >
                             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
