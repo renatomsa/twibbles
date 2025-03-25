@@ -10,9 +10,17 @@ interface PostProps {
   user_name: string;
   post_text: string;
   currentUserId: number;
+  currentUserName?: string;
 }
 
-const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, currentUserId }) => {
+const Post: React.FC<PostProps> = ({
+  post_id,
+  user_id,
+  user_name,
+  post_text,
+  currentUserId,
+  currentUserName = `User #${currentUserId}`
+}) => {
   const [liked, setLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -26,7 +34,7 @@ const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, cur
   const toggleComments = async () => {
     const newShowComments = !showComments;
     setShowComments(newShowComments);
-    
+
     if (newShowComments && comments.length === 0) {
       await fetchComments();
     }
@@ -34,7 +42,7 @@ const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, cur
 
   const fetchComments = async () => {
     if (!post_id) return;
-    
+
     setCommentError(null);
     try {
       setIsLoadingComments(true);
@@ -51,14 +59,14 @@ const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, cur
 
   const handleAddComment = async (content: string) => {
     if (!post_id) return;
-    
+
     setCommentError(null);
     try {
       console.log(`Adding comment to post ${post_id} by user ${currentUserId}:`, content);
-      
+
       // Call the service to create a comment
       const newComment = await commentService.createComment(currentUserId, post_id, content);
-      
+
       if (newComment) {
         console.log('Comment added successfully:', newComment);
         setComments(prev => [...prev, newComment]);
@@ -76,7 +84,7 @@ const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, cur
     try {
       console.log(`Deleting comment ${commentId} by user ${currentUserId}`);
       const success = await commentService.deleteComment(currentUserId, commentId);
-      
+
       if (success) {
         console.log('Comment deleted successfully');
         setComments(prev => prev.filter(comment => comment.id !== commentId));
@@ -100,19 +108,19 @@ const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, cur
     <div className="bg-gray-200 rounded-md p-4 shadow-sm">
       <h3 className="font-semibold text-lg text-gray-800">{user_name}</h3>
       <p className="my-2 text-gray-700">{post_text}</p>
-      
+
       <div className="flex items-center mt-3 space-x-4">
-        <button 
-          onClick={toggleLike} 
+        <button
+          onClick={toggleLike}
           className="flex items-center text-gray-500 hover:text-red-500"
         >
-          <Heart 
-            size={18} 
+          <Heart
+            size={18}
             className={liked ? "fill-red-500 text-red-500" : ""}
           />
         </button>
-        
-        <button 
+
+        <button
           onClick={toggleComments}
           className="flex items-center text-gray-500 hover:text-blue-500"
         >
@@ -122,13 +130,13 @@ const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, cur
           )}
         </button>
       </div>
-      
+
       {showComments && (
         <div className="mt-3">
           {commentError && (
             <p className="text-sm text-red-500 mb-2">{commentError}</p>
           )}
-          
+
           {isLoadingComments ? (
             <p className="text-sm text-gray-500">Loading comments...</p>
           ) : comments.length > 0 ? (
@@ -145,11 +153,12 @@ const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, cur
           ) : (
             <p className="text-sm text-gray-500">No comments yet.</p>
           )}
-          
+
           <div className="mt-3">
-            <CommentForm 
+            <CommentForm
               postId={post_id}
               userId={currentUserId}
+              userName={currentUserName}
               onSubmit={handleAddComment}
             />
           </div>

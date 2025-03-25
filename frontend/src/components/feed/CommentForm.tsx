@@ -3,24 +3,25 @@ import { useState } from "react";
 interface CommentFormProps {
   postId: number;
   userId: number;
+  userName?: string;
   onSubmit: (content: string) => Promise<void>;
 }
 
-const CommentForm: React.FC<CommentFormProps> = ({ postId, userId, onSubmit }) => {
+const CommentForm: React.FC<CommentFormProps> = ({ postId, userId, userName, onSubmit }) => {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!content.trim()) return;
-    
+
     setFormError(null);
     try {
       setIsSubmitting(true);
-      console.log(`Submitting comment for post ${postId} by user ${userId}: "${content}"`);
-      
+      console.log(`Submitting comment for post ${postId} by user ${userId} (${userName}): "${content}"`);
+
       await onSubmit(content);
       setContent(""); // Clear form after successful submission
     } catch (error) {
@@ -36,7 +37,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ postId, userId, onSubmit }) =
       {formError && (
         <p className="text-red-500 text-xs mb-2">{formError}</p>
       )}
-      
+
       <div className="flex space-x-2">
         <input
           type="text"
@@ -58,4 +59,4 @@ const CommentForm: React.FC<CommentFormProps> = ({ postId, userId, onSubmit }) =
   );
 };
 
-export default CommentForm; 
+export default CommentForm;

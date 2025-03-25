@@ -7,13 +7,13 @@ interface CommentProps {
   onDelete?: (commentId: number) => void;
 }
 
-const CommentComponent: React.FC<CommentProps> = ({ 
-  comment, 
+const CommentComponent: React.FC<CommentProps> = ({
+  comment,
   currentUserId,
-  onDelete 
+  onDelete
 }) => {
   console.log("Rendering comment:", comment);
-  
+
   // Extract data from the array structure
   const getCommentValue = (key: string): any => {
     // If comment is an array of arrays (as seen in the console)
@@ -29,11 +29,12 @@ const CommentComponent: React.FC<CommentProps> = ({
     }
     return null;
   };
-  
+
   const content = getCommentValue("content");
   const commentId = getCommentValue("id");
   const userId = getCommentValue("user_id");
-  
+  const userName = getCommentValue("user_name") || `User #${userId}`;
+
   const isAuthor = currentUserId === userId;
 
   const handleDelete = () => {
@@ -46,7 +47,7 @@ const CommentComponent: React.FC<CommentProps> = ({
     <div className="py-2 px-3 border-t border-gray-300 mt-2 bg-gray-100 rounded">
       <div className="flex justify-between items-start">
         <p className="text-sm text-gray-600 font-medium">
-          User #{userId}
+          {userName}
         </p>
         {isAuthor && (
           <button
@@ -63,4 +64,4 @@ const CommentComponent: React.FC<CommentProps> = ({
   );
 };
 
-export default CommentComponent; 
+export default CommentComponent;

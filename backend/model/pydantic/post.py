@@ -10,6 +10,7 @@ class Post(BaseModel):
     date_time: datetime
     location: Optional[str] = None
     hashtags: Optional[str] = None
+    user_name: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

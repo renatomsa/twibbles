@@ -53,7 +53,7 @@ export const apiService = {
     },
 
     // PATCH request
-    patch: async <T>(url: string, data: any): Promise<ApiResponse<T>> => {
+    patch: async <T>(url: string, data?: any): Promise<ApiResponse<T>> => {
         const response = await api.patch(url, data);
         return response.data;
     }
