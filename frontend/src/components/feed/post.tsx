@@ -1,19 +1,35 @@
+import { Heart } from "lucide-react";
+import { useState } from "react";
+
 interface PostProps {
-    user_name: string;
-    post_text: string;
-  }
-  
-  const Post: React.FC<PostProps> = ({ user_name, post_text }) => {
-    return (
-    <div className="border border-gray-800 p-4 rounded-lg shadow-md bg-gray-700/80 text-gray-100">
-        <h3 className="font-bold text-lg">{user_name}</h3>
-        <div className="p-0.5 my-4 mr-0.5 border-solid border-r-2 bg-gray-900 rounded-lg"></div>
-        <div className="bg-gray-600/80 p-4 rounded-lg text-ellipsis">
-          <p className="text-gray-100">{post_text}</p>
-        </div>
-      </div>
-    );
+  user_name: string;
+  post_text: string;
+}
+
+const Post: React.FC<PostProps> = ({ user_name, post_text }) => {
+  const [liked, setLiked] = useState(false);
+
+  const toggleLike = () => {
+    setLiked(!liked);
   };
 
+  return (
+    <div className="bg-gray-200 rounded-md p-4 shadow-sm">
+      <h3 className="font-semibold text-lg text-gray-800">{user_name}</h3>
+      <p className="my-2 text-gray-700">{post_text}</p>
+      <div className="flex items-center mt-3">
+        <button 
+          onClick={toggleLike} 
+          className="flex items-center text-gray-500 hover:text-red-500"
+        >
+          <Heart 
+            size={18} 
+            className={liked ? "fill-red-500 text-red-500" : ""}
+          />
+        </button>
+      </div>
+    </div>
+  );
+};
 
-  export default Post;
+export default Post;

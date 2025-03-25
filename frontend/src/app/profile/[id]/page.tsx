@@ -14,7 +14,7 @@ async function getInitialData() {
     return userId;
 }
 
-export default function ProfilePage() {
+export default function ProfilePage({ params }: { params: { id: string } }) {
     const [profile, setProfile] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isCurrentUser, setIsCurrentUser] = useState(false);
@@ -24,12 +24,9 @@ export default function ProfilePage() {
         const fetchProfile = async () => {
             try {
                 const currentUserId = await getInitialData();
+                const profileId = params.id;
 
-                if (!currentUserId) {
-                    throw new Error('Usuário não está logado');
-                }
-
-                const response = await apiService.get<User>(`user/get_user_by_id/${currentUserId}`);
+                const response = await apiService.get<User>(`user/get_user_by_id/${profileId}`);
                 setProfile(response.data);
                 setIsCurrentUser(currentUserId === response.data.id);
                 setIsLoading(false);
@@ -40,7 +37,7 @@ export default function ProfilePage() {
         };
 
         fetchProfile();
-    }, []);
+    }, [params.id]);
 
     if (isLoading) {
         return <div className="flex justify-center items-center min-h-screen">Carregando...</div>;
