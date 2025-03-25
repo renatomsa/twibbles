@@ -12,19 +12,41 @@ const CommentComponent: React.FC<CommentProps> = ({
   currentUserId,
   onDelete 
 }) => {
-  const isAuthor = currentUserId === comment.user_id;
+  console.log("Rendering comment:", comment);
+  
+  // Extract data from the array structure
+  const getCommentValue = (key: string): any => {
+    // If comment is an array of arrays (as seen in the console)
+    if (Array.isArray(comment)) {
+      for (const item of comment) {
+        if (Array.isArray(item) && item[0] === key) {
+          return item[1];
+        }
+      }
+    } else {
+      // If it's a regular object
+      return (comment as any)[key];
+    }
+    return null;
+  };
+  
+  const content = getCommentValue("content");
+  const commentId = getCommentValue("id");
+  const userId = getCommentValue("user_id");
+  
+  const isAuthor = currentUserId === userId;
 
   const handleDelete = () => {
-    if (onDelete) {
-      onDelete(comment.id);
+    if (onDelete && commentId) {
+      onDelete(commentId);
     }
   };
 
   return (
-    <div className="py-2 border-t border-gray-300 mt-2">
+    <div className="py-2 px-3 border-t border-gray-300 mt-2 bg-gray-100 rounded">
       <div className="flex justify-between items-start">
-        <p className="text-sm text-gray-500">
-          <span className="font-medium">User #{comment.user_id}</span>
+        <p className="text-sm text-gray-600 font-medium">
+          User #{userId}
         </p>
         {isAuthor && (
           <button
@@ -36,7 +58,7 @@ const CommentComponent: React.FC<CommentProps> = ({
           </button>
         )}
       </div>
-      <p className="mt-1 text-sm">{comment.content}</p>
+      <p className="mt-2 text-sm text-gray-800">{content || "No content"}</p>
     </div>
   );
 };

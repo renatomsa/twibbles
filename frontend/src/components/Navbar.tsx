@@ -19,7 +19,7 @@ export function Navbar() {
                             href="/" 
                             className="text-xl font-bold text-gray-800"
                         >
-                            RedeSocial
+                            Twibbles
                         </Link>
                     </div>
 

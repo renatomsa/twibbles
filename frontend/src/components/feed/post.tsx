@@ -133,9 +133,9 @@ const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, cur
             <p className="text-sm text-gray-500">Loading comments...</p>
           ) : comments.length > 0 ? (
             <div className="space-y-2">
-              {comments.map(comment => (
+              {comments.map((comment, index) => (
                 <CommentComponent
-                  key={comment.id}
+                  key={`${comment.id}-${index}`}
                   comment={comment}
                   currentUserId={currentUserId}
                   onDelete={handleDeleteComment}
@@ -146,11 +146,13 @@ const Post: React.FC<PostProps> = ({ post_id, user_id, user_name, post_text, cur
             <p className="text-sm text-gray-500">No comments yet.</p>
           )}
           
-          <CommentForm 
-            postId={post_id}
-            userId={currentUserId}
-            onSubmit={handleAddComment}
-          />
+          <div className="mt-3">
+            <CommentForm 
+              postId={post_id}
+              userId={currentUserId}
+              onSubmit={handleAddComment}
+            />
+          </div>
         </div>
       )}
     </div>
