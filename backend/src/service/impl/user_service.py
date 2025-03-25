@@ -1,5 +1,5 @@
-from model.pydantic.user import User as UserPydantic
 from model.pydantic.user import CreateUser
+from model.pydantic.user import User as UserPydantic
 from model.sqlalchemy.user import User
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -33,7 +33,7 @@ def get_user(user_id: int):
 def get_users_by_substring(substring: str):
     try:
         with Session(postgresql_engine) as session:
-            statement = select(User).where(User.user_name.contains(substring))
+            statement = select(User).where(User.user_name.ilike(f"%{substring}%"))
             users = session.execute(statement).scalars().all()
 
             users = [UserPydantic(id=user.id,

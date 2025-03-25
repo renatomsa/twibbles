@@ -7,8 +7,12 @@ interface FollowRequestsTabProps {
 
 interface FollowRequest {
   requester_id: number;
-  requester_username: string;
-  profile_img_path: string;
+  requested_id: number;
+  requester: {
+    id: number;
+    user_name: string;
+    profile_img_path: string;
+  };
 }
 
 const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
@@ -66,11 +70,11 @@ const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
             <li key={request.requester_id} className="flex items-center justify-between p-3 border rounded">
               <div className="flex items-center">
                 <img 
-                  src={request.profile_img_path} 
+                  src={request.requester.profile_img_path} 
                   alt="User avatar" 
                   className="w-10 h-10 rounded-full mr-3"
                 />
-                <span>{request.requester_username}</span>
+                <span>{request.requester.user_name}</span>
               </div>
               <div className="flex space-x-2">
                 <button 

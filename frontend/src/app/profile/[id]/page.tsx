@@ -4,6 +4,7 @@ import FollowButton from '@/components/FollowButton';
 import FollowersTab from '@/components/FollowersTab';
 import FollowingTab from '@/components/FollowingTab';
 import FollowRequestsTab from '@/components/FollowRequestsTab';
+import PrivacyButton from '@/components/PrivacyButton';
 import { apiService } from '@/lib/api';
 import { User } from '@/types/user';
 import Image from 'next/image';
@@ -21,6 +22,8 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     const [isCurrentUser, setIsCurrentUser] = useState(false);
     const [activeTab, setActiveTab] = useState('posts');
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [canViewProfile, setCanViewProfile] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -31,7 +34,15 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
 
                 const response = await apiService.get<User>(`user/get_user_by_id/${profileId}`);
                 setProfile(response.data);
-                setIsCurrentUser(currentId === response.data.id);
+                const isCurrentUserProfile = currentId === response.data.id;
+                setIsCurrentUser(isCurrentUserProfile);
+
+                if (!isCurrentUserProfile) {
+                    const followsResponse = await apiService.get(`follow/${currentId}/follows/${profileId}`);
+                    setIsFollowing(followsResponse.data as boolean);
+                }
+
+                setCanViewProfile(isCurrentUserProfile || !response.data.is_private || isFollowing);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Erro ao carregar perfil:', error);
@@ -52,7 +63,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
 
     return (
         <div className="min-h-screen pt-10 bg-[#FFFFFF]">
-            {/* Box de perfil */}
+            {/* Box de perfil - mantém-se sempre visível */}
             <div className="w-[80%] mx-auto p-6 bg-[#2D2D2D] rounded-lg shadow-sm mt-16">
                 <div className="flex items-start space-x-8">
                     <div className="relative w-[150px] h-[150px] rounded-full overflow-hidden bg-gray-200">
@@ -70,12 +81,25 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                                 {profile.user_name}
                             </h1>
                             
-                            {!isCurrentUser && currentUserId && profile && (
-                                <FollowButton
-                                    currentUserId={currentUserId}
-                                    profileUserId={profile.id}
-                                    isPrivateAccount={profile.is_private}
+                            {isCurrentUser ? (
+                                <PrivacyButton
+                                    userId={profile.id}
+                                    isPrivate={profile.is_private}
+                                    onPrivacyChange={(newPrivacyState) => {
+                                        setProfile(prev => prev ? {
+                                            ...prev,
+                                            is_private: newPrivacyState
+                                        } : null);
+                                    }}
                                 />
+                            ) : (
+                                currentUserId && profile && (
+                                    <FollowButton
+                                        currentUserId={currentUserId}
+                                        profileUserId={profile.id}
+                                        isPrivateAccount={profile.is_private}
+                                    />
+                                )
                             )}
                         </div>
                         
@@ -86,64 +110,70 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                 </div>
             </div>
 
-            {/* Tabs de navegação */}
-            <div className="w-[80%] mx-auto mt-8">
-                <div className="tabs flex border-b mb-4">
-                    <button 
-                        className={`tab py-2 px-4 font-medium ${activeTab === 'posts' ? 'border-b-2 border-blue-500' : ''}`}
-                        onClick={() => setActiveTab('posts')}
-                    >
-                        Posts
-                    </button>
-                    <button 
-                        className={`tab py-2 px-4 font-medium ${activeTab === 'followers' ? 'border-b-2 border-blue-500' : ''}`}
-                        onClick={() => setActiveTab('followers')}
-                    >
-                        Followers
-                    </button>
-                    <button 
-                        className={`tab py-2 px-4 font-medium ${activeTab === 'following' ? 'border-b-2 border-blue-500' : ''}`}
-                        onClick={() => setActiveTab('following')}
-                    >
-                        Following
-                    </button>
-                    
-                    {isCurrentUser && profile.is_private && (
+            {!canViewProfile && profile?.is_private ? (
+                <div className="w-[80%] mx-auto mt-8 text-center">
+                    <p className="text-lg text-gray-600">Este perfil é privado</p>
+                </div>
+            ) : (
+                /* Tabs de navegação e conteúdo - só aparecem se puder visualizar */
+                <div className="w-[80%] mx-auto mt-8">
+                    <div className="tabs flex border-b mb-4">
                         <button 
-                            className={`tab py-2 px-4 font-medium ${activeTab === 'requests' ? 'border-b-2 border-blue-500' : ''}`}
-                            onClick={() => setActiveTab('requests')}
+                            className={`tab py-2 px-4 font-medium ${activeTab === 'posts' ? 'border-b-2 border-blue-500' : ''}`}
+                            onClick={() => setActiveTab('posts')}
                         >
-                            Follow Requests
+                            Posts
                         </button>
-                    )}
-                </div>
+                        <button 
+                            className={`tab py-2 px-4 font-medium ${activeTab === 'followers' ? 'border-b-2 border-blue-500' : ''}`}
+                            onClick={() => setActiveTab('followers')}
+                        >
+                            Followers
+                        </button>
+                        <button 
+                            className={`tab py-2 px-4 font-medium ${activeTab === 'following' ? 'border-b-2 border-blue-500' : ''}`}
+                            onClick={() => setActiveTab('following')}
+                        >
+                            Following
+                        </button>
+                        
+                        {isCurrentUser && profile.is_private && (
+                            <button 
+                                className={`tab py-2 px-4 font-medium ${activeTab === 'requests' ? 'border-b-2 border-blue-500' : ''}`}
+                                onClick={() => setActiveTab('requests')}
+                            >
+                                Follow Requests
+                            </button>
+                        )}
+                    </div>
 
-                <div className="tab-content">
-                    {activeTab === 'posts' && (
-                        <div className="posts-grid">
-                            <p>Posts content</p>
-                        </div>
-                    )}
-                    
-                    {activeTab === 'followers' && profile && currentUserId && (
-                        <FollowersTab 
-                            userId={profile.id} 
-                            currentUserId={currentUserId} 
-                        />
-                    )}
-                    
-                    {activeTab === 'following' && profile && currentUserId && (
-                        <FollowingTab 
-                            userId={profile.id} 
-                            currentUserId={currentUserId} 
-                        />
-                    )}
-                    
-                    {activeTab === 'requests' && isCurrentUser && profile?.is_private && (
-                        <FollowRequestsTab userId={profile.id} />
-                    )}
+                    <div className="tab-content">
+                        {activeTab === 'posts' && (
+                            <div className="posts-grid">
+                                <p>Posts content</p>
+                            </div>
+                        )}
+                        
+                        {activeTab === 'followers' && profile && currentUserId && (
+                            <FollowersTab 
+                                userId={profile.id} 
+                                currentUserId={currentUserId} 
+                            />
+                        )}
+                        
+                        {activeTab === 'following' && profile && currentUserId && (
+                            <FollowingTab 
+                                userId={profile.id} 
+                                currentUserId={currentUserId} 
+                            />
+                        )}
+                        
+                        {activeTab === 'requests' && isCurrentUser && profile?.is_private && (
+                            <FollowRequestsTab userId={profile.id} />
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
