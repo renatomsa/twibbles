@@ -14,13 +14,14 @@ const User = () => {
             name: "JP",
             text: "Eu sou de falar e não de fazer",
         }
+        
     ];
 
     return (
         <div className="h-screen w-screen flex flex-col">
             {/* Header */}
-            <div className="h-[20%] w-full p-5 bg-indigo-600">
-                <h1 className="text-white text-3xl">User Header</h1>
+            <div className="h-[10%] w-full p-5 bg-indigo-600">
+                <h1 className="text-white text-3xl font-bold">Twibbles</h1>
             </div>
 
             {/* Body */}
@@ -32,11 +33,14 @@ const User = () => {
                     </div>
 
                     {/* Lista de Posts */}
-                    {postList.map((post, index) => (
-                        <div key={index} className="w-[50%]">
-                            <Post user_name={post.name} post_text={post.text} />
-                        </div>
-                    ))}
+                    <div className="w-[50%] ">
+                        {postList.map((post, index) => (
+                            <div key={index} className="m-4">
+                                <Post user_name={post.name} post_text={post.text} />
+                            </div>
+                        ))}
+                    </div>
+                    
                 </div>
             </div>
         </div>
