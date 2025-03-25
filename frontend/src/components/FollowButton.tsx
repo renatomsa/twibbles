@@ -10,12 +10,14 @@ interface FollowButtonProps {
   currentUserId: number;
   profileUserId: number;
   isPrivateAccount: boolean;
+  onStatusChange?: () => void;
 }
 
 const FollowButton: React.FC<FollowButtonProps> = ({ 
   currentUserId, 
   profileUserId,
-  isPrivateAccount 
+  isPrivateAccount,
+  onStatusChange 
 }) => {
   const [relationship, setRelationship] = useState<'none' | 'following' | 'requested'>('none');
   const [isLoading, setIsLoading] = useState(false);
@@ -59,20 +61,18 @@ const FollowButton: React.FC<FollowButtonProps> = ({
     setIsLoading(true);
     try {
       if (relationship === 'following') {
-        // Unfollow user
         await apiService.post(`/follow/${currentUserId}/unfollow/${profileUserId}`, {});
         setRelationship('none');
       } 
       else if (relationship === 'requested') {
-        // Cancel request - we need to use unfollow for this based on the API
         await apiService.post(`/follow/${currentUserId}/unfollow/${profileUserId}`, {});
         setRelationship('none');
       }
       else {
-        // Follow or request to follow
         await apiService.post(`/follow/${currentUserId}/follow/${profileUserId}`, {});
         setRelationship(isPrivateAccount ? 'requested' : 'following');
       }
+      onStatusChange?.();
     } catch (error) {
       console.error('Error updating follow status:', error);
     } finally {

@@ -28,6 +28,10 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
     }
   };
 
+  const handleFollowStatusChange = () => {
+    fetchFollowing(); // Recarrega a lista quando o status de follow muda
+  };
+
   if (loading) {
     return <div className="p-4">Loading following...</div>;
   }
@@ -54,6 +58,7 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
                   currentUserId={currentUserId}
                   profileUserId={user.id}
                   isPrivateAccount={user.is_private}
+                  onStatusChange={handleFollowStatusChange}
                 />
               )}
             </li>

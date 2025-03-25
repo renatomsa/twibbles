@@ -1,5 +1,6 @@
 'use client';
 
+import FollowButton from '@/components/FollowButton';
 import FollowersTab from '@/components/FollowersTab';
 import FollowingTab from '@/components/FollowingTab';
 import FollowRequestsTab from '@/components/FollowRequestsTab';
@@ -19,16 +20,18 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     const [isLoading, setIsLoading] = useState(true);
     const [isCurrentUser, setIsCurrentUser] = useState(false);
     const [activeTab, setActiveTab] = useState('posts');
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const currentUserId = await getInitialData();
+                const currentId = await getInitialData();
+                setCurrentUserId(currentId);
                 const profileId = Number(params.id);
 
                 const response = await apiService.get<User>(`user/get_user_by_id/${profileId}`);
                 setProfile(response.data);
-                setIsCurrentUser(currentUserId === response.data.id);
+                setIsCurrentUser(currentId === response.data.id);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Erro ao carregar perfil:', error);
@@ -67,10 +70,12 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                                 {profile.user_name}
                             </h1>
                             
-                            {!isCurrentUser && (
-                                <button className="px-8 py-2.5 bg-[#FFB067] text-white rounded-md hover:bg-[#FF9647] transition-colors font-medium">
-                                    SEGUIR
-                                </button>
+                            {!isCurrentUser && currentUserId && profile && (
+                                <FollowButton
+                                    currentUserId={currentUserId}
+                                    profileUserId={profile.id}
+                                    isPrivateAccount={profile.is_private}
+                                />
                             )}
                         </div>
                         
@@ -120,17 +125,17 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                         </div>
                     )}
                     
-                    {activeTab === 'followers' && profile && (
+                    {activeTab === 'followers' && profile && currentUserId && (
                         <FollowersTab 
                             userId={profile.id} 
-                            currentUserId={profile.id} 
+                            currentUserId={currentUserId} 
                         />
                     )}
                     
-                    {activeTab === 'following' && profile && (
+                    {activeTab === 'following' && profile && currentUserId && (
                         <FollowingTab 
                             userId={profile.id} 
-                            currentUserId={profile.id} 
+                            currentUserId={currentUserId} 
                         />
                     )}
                     
