@@ -48,3 +48,9 @@ def create_post(user_id: int, data: CreatePost):
 def get_feed(user_id: int):
     response = post_service.get_feed(user_id)
     return response
+
+@api.get("/public", response_model=HttpResponseModel)
+def get_public_posts():
+    """Get all posts from public users for the explore page"""
+    response = post_service.get_public_posts()
+    return response

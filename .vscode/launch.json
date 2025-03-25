@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      //uvicorn reload
+      // main is in src/main.py
+      {
+          "name": "Python: Uvicorn",
+          "type": "debugpy",
+          "request": "launch",
+          "module": "uvicorn",
+          "args": [
+              "src.main:app",
+              "--host",
+              "0.0.0.0",
+              "--port",
+              "8888",
+              "--reload"
+          ],
+          "jinja": true,
+          "envFile": "${workspaceFolder}/backend/credentials.env",
+          "cwd": "${workspaceFolder}/backend"
+      },
+      // o autogenerate serve basicamente pra comparar o estado atual do banco com o estado
+      // atual da base declarada no código e gerar um arquivo de migração
+      {
+          "name": "Alembic Autogenerate Revision",
+          "type": "debugpy",
+          "request": "launch",
+          "module": "alembic",
+          "args": [
+              "revision",
+              "--autogenerate"
+          ],
+          "console": "integratedTerminal",
+          "envFile": "${workspaceFolder}/backend/credentials.env",
+          "cwd": "${workspaceFolder}/backend"
+      },
+      // o upgrade head serve pra aplicar todas as migrações que ainda não foram aplicadas
+      // compara o id da ultima migration com o estado atual do bando e aplica todas as migrações
+      {
+          "name": "Alembic Upgrade Head",
+          "type": "debugpy",
+          "request": "launch",
+          "module": "alembic",
+          "args": [
+              "upgrade",
+              "head"
+          ],
+          "console": "integratedTerminal",
+          "envFile": "${workspaceFolder}/backend/credentials.env",
+          "cwd": "${workspaceFolder}/backend"
+      }
+  ]
+}

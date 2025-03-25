@@ -20,7 +20,7 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
     try {
       setLoading(true);
       const response = await apiService.get<User[]>(`/follow/${userId}/following`);
-      setFollowing(response.data);
+      setFollowing(response.data ?? []);
     } catch (error) {
       console.error('Error fetching following:', error);
     } finally {
@@ -46,15 +46,15 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
           {following.map((user) => (
             <li key={user.id} className="flex items-center justify-between p-3 border rounded">
               <div className="flex items-center">
-                <img 
-                  src={user.profile_img_path} 
-                  alt="User avatar" 
+                <img
+                  src={user.profile_img_path}
+                  alt="User avatar"
                   className="w-10 h-10 rounded-full mr-3"
                 />
                 <span>{user.user_name}</span>
               </div>
               {currentUserId !== user.id && (
-                <FollowButton 
+                <FollowButton
                   currentUserId={currentUserId}
                   profileUserId={user.id}
                   isPrivateAccount={user.is_private}
@@ -69,4 +69,4 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
   );
 };
 
-export default FollowingTab; 
+export default FollowingTab;

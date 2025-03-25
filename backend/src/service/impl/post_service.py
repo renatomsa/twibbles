@@ -39,7 +39,7 @@ def get_posts(user_id: int):
                                      data=result)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
-    
+
 def get_posts_sorted_by_comment(user_id: int):
     try:
         with Session(postgresql_engine) as session:
@@ -61,7 +61,7 @@ def get_posts_sorted_by_comment(user_id: int):
                                     date_time=p.date_time).model_dump()
                 result_posts.append(post)
                 result_comments.append(p.comment_count)
-    
+
             if posts is None:
                 return HttpResponseModel(status_code=404, message="No posts were found")
             return HttpResponseModel(status_code=200,
@@ -85,7 +85,7 @@ def delete_post(user_id: int, post_id: int):
 
             if post.user_id != user_id:
                 return HttpResponseModel(status_code=403, message="Unauthorized to delete post")
-            
+
             session.execute(delete(Comment).where(Comment.post_id == post_id))
             session.delete(post)
             session.commit()
@@ -233,10 +233,10 @@ def get_dashboard_data(user_id: int, period: int) -> HttpResponseModel:
             comment_avg = sum(comment_counts) / len(comment_counts) if len(comment_counts) > 0 else 0
             if not comment_counts:
                 return HttpResponseModel(status_code=404, message="No comments were found")
-            
+
             statement = (
                 select(
-                    cast(Comment.created_at, Date).label("comment_date"), 
+                    cast(Comment.created_at, Date).label("comment_date"),
                     func.count(Comment.id).label("comment_count")
                 )
                 .join(Post, Post.id == Comment.post_id)
@@ -253,12 +253,56 @@ def get_dashboard_data(user_id: int, period: int) -> HttpResponseModel:
 
             if not result:
                 return HttpResponseModel(status_code=404, message="No comments were found")
-            
+
             return HttpResponseModel(
                 status_code=200,
                 message="Dashboard ready",
                 data={"comment_avg": comment_avg, "comments": result}
             )
-    
+
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
+
+def get_public_posts() -> HttpResponseModel:
+    try:
+        with Session(postgresql_engine) as session:
+            # Join Post with User and get only posts from non-private users
+            statement = (
+                select(Post, User)
+                .join(User, User.id == Post.user_id)
+                .where(User.is_private == False)
+                .order_by(Post.date_time.desc())
+            )
+            posts = session.execute(statement).fetchall()
+
+            if not posts:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="No public posts found"
+                )
+
+            result = []
+            for entry in posts:
+                p = entry.Post
+                u = entry.User
+                post = PostPydantic(
+                    id=p.id,
+                    user_id=p.user_id,
+                    user_name=u.user_name,
+                    text=p.text,
+                    location=p.location if p.location else None,
+                    hashtags=p.hashtags if p.hashtags else None,
+                    date_time=p.date_time
+                ).model_dump()
+                result.append(post)
+
+            return HttpResponseModel(
+                status_code=200,
+                message="Public posts retrieved successfully",
+                data=result
+            )
+    except Exception as e:
+        return HttpResponseModel(
+            status_code=500,
+            message=str(e)
+        )
