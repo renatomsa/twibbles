@@ -11,20 +11,20 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response) {
-            console.error('Erro na resposta:', error.response.data);
+            console.error('Error response:', error.response.data);
         } else if (error.request) {
-            console.error('Erro na requisição:', error.request);
+            console.error('Error request:', error.request);
         } else {
-            console.error('Erro:', error.message);
+            console.error('Error:', error.message);
         }
         return Promise.reject(error);
     }
 );
 
-interface ApiResponse<T> {
-    data: T;
-    message?: string;
-    status: number;
+export interface ApiResponse<T> {
+    status_code: number;
+    message: string;
+    data?: T;
 }
 
 export const apiService = {

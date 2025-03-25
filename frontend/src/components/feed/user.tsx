@@ -1,45 +1,77 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Post from "./post";
 import CreatePost from "./createPost";
+import { Post as PostType, postService } from "@/services/postService";
+import { getClientUserId } from "@/lib/auth";
 
 const User = () => {
-  const [postList, setPostList] = useState([
-    {
-      name: "Rodrigo Ladvocat",
-      text: "Matéria tá complicada, quero ver o que a gente vai fazer",
-    },
-    {
-      name: "Rodrigo Ladvocat",
-      text: "A economia está muito boa, o ovo está barato",
-    },
-    {
-      name: "JP",
-      text: "Quero me demitir",
-    },
-  ]);
-  
+  const [postList, setPostList] = useState<PostType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
+
+  // Get current user ID from cookie via local storage
+  const currentUserId = getClientUserId();
+  
+  // Fetch feed when component mounts
+  useEffect(() => {
+    fetchFeed();
+  }, []);
+
+  const fetchFeed = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Get feed for current user
+      const posts = await postService.getFeed(currentUserId);
+      console.log(`Fetched feed posts for user ${currentUserId}:`, posts);
+      
+      setPostList(posts);
+    } catch (error) {
+      console.error("Error fetching feed:", error);
+      setError("Failed to load feed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const toggleFormVisibility = () => {
     setIsFormVisible((prev) => !prev);
   };
 
-
-  const handlePostSubmit = (newPost: string) => {
-    const newPostItem = {
-      name: "Novo Usuário", 
-      text: newPost,
-    };
-
-    setPostList((prevList) => [newPostItem, ...prevList]);
-    setIsFormVisible(false); 
+  const handlePostSubmit = async (postContent: string) => {
+    try {
+      setError(null);
+      
+      // Create a new post in the backend
+      // The text parameter is required, location and hashtags are optional
+      const newPost = await postService.createPost(currentUserId, postContent);
+      
+      if (newPost) {
+        // Add the new post to the list
+        setPostList((prevList) => [newPost, ...prevList]);
+        setIsFormVisible(false);
+      } else {
+        setError("Failed to create post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+      setError("An error occurred while creating your post.");
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 pt-16">
       <main className="flex-1 max-w-2xl mx-auto w-full py-4 px-4">
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+            {error}
+          </div>
+        )}
+
         <div className="fixed bottom-8 right-8">
           <button 
             onClick={toggleFormVisibility}
@@ -51,17 +83,33 @@ const User = () => {
 
         {isFormVisible && (
           <div className="mb-6 p-4">
-            <CreatePost userName="Novo Usuário" onPostSubmit={handlePostSubmit} />
+            <CreatePost userName={`User #${currentUserId}`} onPostSubmit={handlePostSubmit} />
           </div>
         )}
 
-        <div className="space-y-4">
-          {postList.map((post, index) => (
-            <div key={index} className="mb-4">
-              <Post user_name={post.name} post_text={post.text} />
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <p className="text-gray-500">Loading posts...</p>
+          </div>
+        ) : postList.length === 0 ? (
+          <div className="flex justify-center py-8">
+            <p className="text-gray-500">No posts in your feed. Follow users to see their posts!</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {postList.map((post) => (
+              <div key={post.id} className="mb-4">
+                <Post 
+                  post_id={post.id} 
+                  user_id={post.user_id} 
+                  user_name={post.user_name || `User #${post.user_id}`} 
+                  post_text={post.text} 
+                  currentUserId={currentUserId}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
