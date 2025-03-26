@@ -26,10 +26,12 @@ def get_posts(user_id: int):
                 return HttpResponseModel(status_code=404, message="No posts were found")
 
             result = []
-            for p in posts:
-                p = p.Post
+            for entry in posts:
+                p = entry.Post
+                u = entry.User
                 post = PostPydantic(id=p.id,
                                     user_id=p.user_id,
+                                    user_name=u.user_name,
                                     text=p.text,
                                     date_time=p.date_time).model_dump()
                 result.append(post)
@@ -43,6 +45,14 @@ def get_posts(user_id: int):
 def get_posts_sorted_by_comment(user_id: int):
     try:
         with Session(postgresql_engine) as session:
+            # Get the user to include user_name in response
+            user = session.get(User, user_id)
+            if not user:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="User not found"
+                )
+
             statement = (
                 select(Post.text, Post.date_time, Comment.post_id, func.count(Comment.id).label("comment_count"))
                 .join(Post, Post.id == Comment.post_id)
@@ -57,6 +67,7 @@ def get_posts_sorted_by_comment(user_id: int):
                 post = PostPydantic(
                                     id=p.post_id,
                                     user_id=user_id,
+                                    user_name=user.user_name,
                                     text=p.text,
                                     date_time=p.date_time).model_dump()
                 result_posts.append(post)
@@ -159,6 +170,14 @@ def get_posts_by_hashtag(hashtag: str) -> HttpResponseModel:
 def create_post(user_id: int, data: dict) -> HttpResponseModel:
     try:
         with Session(postgresql_engine) as session:
+            # Get the user to include user_name in response
+            user = session.get(User, user_id)
+            if not user:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="User not found"
+                )
+
             post = Post(user_id=user_id,
                         text=data["text"],
                         location=data["location"],
@@ -169,6 +188,7 @@ def create_post(user_id: int, data: dict) -> HttpResponseModel:
 
             post = PostPydantic(id=post.id,
                                 user_id=post.user_id,
+                                user_name=user.user_name,
                                 text=post.text,
                                 location=post.location,
                                 hashtags=post.hashtags,
