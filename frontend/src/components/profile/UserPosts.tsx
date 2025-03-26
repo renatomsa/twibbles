@@ -54,12 +54,12 @@ const UserPosts: React.FC<UserPostsProps> = ({ userId, currentUserId }) => {
     setIsFormVisible(prev => !prev);
   };
 
-  const handlePostSubmit = async (postContent: string) => {
+  const handlePostSubmit = async (postContent: string, location: string, hashtags: string) => {
     try {
       setError(null);
 
-      // Create a new post in the backend
-      const newPost = await postService.createPost(currentUserId, postContent);
+      // Create a new post in the backend with location and hashtags
+      const newPost = await postService.createPost(currentUserId, postContent, location, hashtags);
 
       if (newPost) {
         // Add the new post to the list
