@@ -98,6 +98,8 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                                             is_private: newPrivacyState
                                         } : null);
                                     }}
+                                    data-testid="privacy-toggle"
+                                    data-private={profile.is_private.toString()}
                                 />
                             ) : (
                                 currentUserId && profile && (
@@ -105,6 +107,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                                         currentUserId={currentUserId}
                                         profileUserId={profile.id}
                                         isPrivateAccount={profile.is_private}
+                                        data-testid="follow-button"
                                     />
                                 )
                             )}
@@ -159,6 +162,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                             <UserPosts
                                 userId={profile.id}
                                 currentUserId={currentUserId}
+                                data-testid="user-posts"
                             />
                         )}
 
@@ -166,6 +170,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                             <FollowersTab
                                 userId={profile.id}
                                 currentUserId={currentUserId}
+                                data-testid="followers-list"
                             />
                         )}
 
@@ -173,6 +178,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                             <FollowingTab
                                 userId={profile.id}
                                 currentUserId={currentUserId}
+                                data-testid="following-list"
                             />
                         )}
 
