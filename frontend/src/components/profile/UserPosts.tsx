@@ -5,6 +5,7 @@ import { Post, postService } from '@/services/postService';
 import { Trash2, Plus } from 'lucide-react';
 import CreatePost from '@/components/feed/createPost';
 import DeletePostModal from "../feed/DeletePostModal";
+import Link from "next/link";
 
 interface UserPostsProps {
   userId: number;
@@ -122,20 +123,22 @@ const UserPosts: React.FC<UserPostsProps> = ({ userId, currentUserId }) => {
           {posts.map(post => (
             <div key={post.id} className="bg-white rounded-lg shadow-sm p-4 relative">
               <div className="flex items-center mb-3">
-                <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden mr-3">
-                  {post.profile_img_path ? (
-                    <img
-                      src={post.profile_img_path}
-                      alt={`${post.user_name}'s profile`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-lg font-bold text-gray-600">
-                      {post.user_name?.charAt(0).toUpperCase() || userId.toString().charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <span className="font-semibold text-lg">{post.user_name || `User #${post.user_id}`}</span>
+                <Link href={`/profile/${post.user_id}`} className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden mr-3 cursor-pointer hover:opacity-80 transition-opacity">
+                    {post.profile_img_path ? (
+                      <img
+                        src={post.profile_img_path}
+                        alt={`${post.user_name}'s profile`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-lg font-bold text-gray-600">
+                        {post.user_name?.charAt(0).toUpperCase() || userId.toString().charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-semibold text-lg hover:underline">{post.user_name || `User #${post.user_id}`}</span>
+                </Link>
 
                 {/* Only show delete button if current user is the post owner */}
                 {currentUserId === post.user_id && (

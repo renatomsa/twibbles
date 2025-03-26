@@ -55,7 +55,10 @@ export function Navbar() {
                 <Link href="/search" className="text-white rounded-full p-2 hover:bg-cyan-800">
                     <Search size={20} />
                 </Link>
-                <Link href="/profile" className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white hover:bg-blue-600">
+                <Link
+                    href={userData?.id ? `/profile/${userData.id}` : "/profile"}
+                    className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white hover:bg-blue-600"
+                >
                     {userData?.user_name ? (
                         <span className="text-sm font-bold">{userData.user_name.charAt(0).toUpperCase()}</span>
                     ) : (
