@@ -20,7 +20,7 @@ export default function SearchPage() {
         try {
             setIsSearching(true);
             const response = await apiService.get<User[]>(`/user/get_users_by_substring/${searchTerm}`);
-            setUsers(response.data);
+            setUsers(response.data || []);
         } catch (error) {
             console.error('Erro ao buscar usuários:', error);
         } finally {
@@ -91,4 +91,4 @@ export default function SearchPage() {
             </div>
         </div>
     );
-} 
+}

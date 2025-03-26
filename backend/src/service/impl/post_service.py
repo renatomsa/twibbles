@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from model.sqlalchemy.user import User
 from model.sqlalchemy.post import Post
 from model.pydantic.post import Post as PostPydantic
+from model.pydantic.post import PostWithUser
 from model.pydantic.post import CreatePost as CreatePostPydantic
 from src.service.impl import follow_service
 from model.sqlalchemy.comment import Comment
@@ -29,11 +30,15 @@ def get_posts(user_id: int):
             for entry in posts:
                 p = entry.Post
                 u = entry.User
-                post = PostPydantic(id=p.id,
-                                    user_id=p.user_id,
-                                    user_name=u.user_name,
-                                    text=p.text,
-                                    date_time=p.date_time).model_dump()
+                post = PostWithUser(
+                    id=p.id,
+                    user_id=p.user_id,
+                    text=p.text,
+                    date_time=p.date_time,
+                    location=p.location if p.location else None,
+                    hashtags=p.hashtags if p.hashtags else None,
+                    user_name=u.user_name
+                ).model_dump()
                 result.append(post)
 
             return HttpResponseModel(status_code=200,
@@ -64,12 +69,14 @@ def get_posts_sorted_by_comment(user_id: int):
             result_posts = []
             result_comments = []
             for p in posts:
-                post = PostPydantic(
-                                    id=p.post_id,
-                                    user_id=user_id,
-                                    user_name=user.user_name,
-                                    text=p.text,
-                                    date_time=p.date_time).model_dump()
+                # Use PostWithUser to combine Post and User information
+                post = PostWithUser(
+                    id=p.post_id,
+                    user_id=user_id,
+                    text=p.text,
+                    date_time=p.date_time,
+                    user_name=user.user_name
+                ).model_dump()
                 result_posts.append(post)
                 result_comments.append(p.comment_count)
 
@@ -186,18 +193,21 @@ def create_post(user_id: int, data: dict) -> HttpResponseModel:
             session.commit()
             session.refresh(post)
 
-            post = PostPydantic(id=post.id,
-                                user_id=post.user_id,
-                                user_name=user.user_name,
-                                text=post.text,
-                                location=post.location,
-                                hashtags=post.hashtags,
-                                date_time=post.date_time
-                                ).model_dump()
+            # Use PostWithUser to combine Post and User information
+            post_with_user = PostWithUser(
+                id=post.id,
+                user_id=post.user_id,
+                text=post.text,
+                date_time=post.date_time,
+                location=post.location,
+                hashtags=post.hashtags,
+                user_name=user.user_name
+            ).model_dump()
+
             return HttpResponseModel(
                 status_code=201,
                 message="Post created",
-                data=post
+                data=post_with_user
             )
     except Exception as e:
         return HttpResponseModel(
@@ -305,14 +315,15 @@ def get_public_posts() -> HttpResponseModel:
             for entry in posts:
                 p = entry.Post
                 u = entry.User
-                post = PostPydantic(
+                # Use PostWithUser instead of adding user_name to Post
+                post = PostWithUser(
                     id=p.id,
                     user_id=p.user_id,
-                    user_name=u.user_name,
                     text=p.text,
+                    date_time=p.date_time,
                     location=p.location if p.location else None,
                     hashtags=p.hashtags if p.hashtags else None,
-                    date_time=p.date_time
+                    user_name=u.user_name
                 ).model_dump()
                 result.append(post)
 
