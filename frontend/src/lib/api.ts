@@ -24,7 +24,7 @@ api.interceptors.response.use(
 interface ApiResponse<T> {
     data: T;
     message?: string;
-    status: number;
+    status_code: number;
 }
 
 export const apiService = {

@@ -21,7 +21,7 @@ def delete_post(user_id : int, post_id : int):
     return delete_post_response
 
 
-@api.get("/{user_id}/dashboard", response_model=HttpResponseModel)
+@api.get("/{user_id}/dashboard/{period}", response_model=HttpResponseModel)
 def get_dashboard_data(user_id : int, period : int):
     get_dashboard_data_response = post_service.get_dashboard_data(user_id, period)
     return get_dashboard_data_response
