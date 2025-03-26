@@ -37,21 +37,26 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
   }
 
   return (
-    <div className="following-container">
-      <h2 className="text-xl font-bold mb-4">Following</h2>
+    <div className="following-container" data-testid="following-tab">
+      <h2 className="text-xl font-bold mb-4" data-testid="following-heading">Following</h2>
       {following.length === 0 ? (
-        <p>Not following anyone yet</p>
+        <p data-testid="no-following-message">Not following anyone yet</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-4" data-testid="following-list">
           {following.map((user) => (
-            <li key={user.id} className="flex items-center justify-between p-3 border rounded">
+            <li 
+              key={user.id} 
+              className="flex items-center justify-between p-3 border rounded"
+              data-testid={`following-item-${user.id}`}
+            >
               <div className="flex items-center">
                 <img
                   src={user.profile_img_path}
                   alt="User avatar"
                   className="w-10 h-10 rounded-full mr-3"
+                  data-testid={`following-avatar-${user.id}`}
                 />
-                <span>{user.user_name}</span>
+                <span data-testid={`following-username-${user.id}`}>{user.user_name}</span>
               </div>
               {currentUserId !== user.id && (
                 <FollowButton
