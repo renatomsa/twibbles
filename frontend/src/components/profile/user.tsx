@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import OwnPost from "./ownpost";
+import OwnPost from "./ownPost";
 
-const Feed = () => {
+const User = () => {
   const [posts, setPosts] = useState([
     { id: 1, user_name: "Alice", post_text: "Hello World!" },
     { id: 2, user_name: "Bob", post_text: "My first post!" },
@@ -39,4 +39,4 @@ const Feed = () => {
     );
 };
 
-export default Feed;
+export default User;

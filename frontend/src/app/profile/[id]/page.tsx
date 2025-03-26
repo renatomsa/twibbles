@@ -5,11 +5,13 @@ import FollowersTab from '@/components/FollowersTab';
 import FollowingTab from '@/components/FollowingTab';
 import FollowRequestsTab from '@/components/FollowRequestsTab';
 import PrivacyButton from '@/components/PrivacyButton';
+import DashboardButton from '@/components/profile/dashboardButton';
 import UserPosts from '@/components/profile/UserPosts';
 import { apiService } from '@/lib/api';
 import { User } from '@/types/user';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 async function getInitialData(): Promise<number> {
     const response = await fetch('/api/auth/current-user');
@@ -89,16 +91,19 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                             </h1>
 
                             {isCurrentUser ? (
-                                <PrivacyButton
-                                    userId={profile.id}
-                                    isPrivate={profile.is_private}
-                                    onPrivacyChange={(newPrivacyState) => {
-                                        setProfile(prev => prev ? {
-                                            ...prev,
-                                            is_private: newPrivacyState
-                                        } : null);
-                                    }}
-                                />
+                                <div className="flex gap-4">
+                                    <PrivacyButton
+                                        userId={profile.id}
+                                        isPrivate={profile.is_private}
+                                        onPrivacyChange={(newPrivacyState) => {
+                                            setProfile(prev => prev ? {
+                                                ...prev,
+                                                is_private: newPrivacyState
+                                            } : null);
+                                        }}
+                                    />
+                                    <DashboardButton userId={profile.id} />
+                                </div>
                             ) : (
                                 currentUserId && profile && (
                                     <FollowButton
@@ -152,6 +157,15 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                                 Follow Requests
                             </button>
                         )}
+                        
+                        {isCurrentUser && (
+                            <button 
+                                className={`tab py-2 px-4 font-medium ${activeTab === 'dashboard' ? 'border-b-2 border-blue-500' : ''}`}
+                                onClick={() => setActiveTab('dashboard')}
+                            >
+                                Estatísticas
+                            </button>
+                        )}
                     </div>
 
                     <div className="tab-content">
@@ -174,6 +188,17 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                                 userId={profile.id}
                                 currentUserId={currentUserId}
                             />
+                        )}
+                        
+                        {activeTab === 'dashboard' && isCurrentUser && (
+                            <div className="mt-4">
+                                <Link 
+                                    href={`/profile/${profile.id}/dashboard`}
+                                    className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+                                >
+                                    Ver Estatísticas de Desempenho
+                                </Link>
+                            </div>
                         )}
 
                         {activeTab === 'requests' && isCurrentUser && profile?.is_private && (

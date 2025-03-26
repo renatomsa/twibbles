@@ -310,7 +310,7 @@ def get_dashboard_data(user_id: int, period: int) -> HttpResponseModel:
 
             comments = session.execute(statement).all()
 
-            result = [(c.comment_date, c.comment_count) for c in comments if c.comment_count > 0]
+            result = [(c.comment_date.strftime("%Y-%m-%d"), c.comment_count) for c in comments if c.comment_count > 0]
 
             if not result:
                 return HttpResponseModel(status_code=404, message="No comments were found")

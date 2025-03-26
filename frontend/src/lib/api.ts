@@ -21,10 +21,10 @@ api.interceptors.response.use(
     }
 );
 
-export interface ApiResponse<T> {
+interface ApiResponse<T> {
+    data: T;
+    message?: string;
     status_code: number;
-    message: string;
-    data?: T;
 }
 
 export const apiService = {
