@@ -102,6 +102,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
 
   return (
     <button
+      data-testid="follow-button"
       className={`px-4 py-2 rounded-md ${getButtonStyle()}`}
       onClick={handleButtonClick}
       disabled={isLoading}
