@@ -9,6 +9,7 @@ export interface Post {
   hashtags?: string;
   date_time?: string;
   user_name?: string; // Added for frontend display
+  profile_img_path?: string; // Added for user profile image
 }
 
 export interface PostCreate {

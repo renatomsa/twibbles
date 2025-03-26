@@ -50,13 +50,20 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
               data-testid={`following-item-${user.id}`}
             >
               <div className="flex items-center">
-                <img
-                  src={user.profile_img_path}
-                  alt="User avatar"
-                  className="w-10 h-10 rounded-full mr-3"
-                  data-testid={`following-avatar-${user.id}`}
-                />
-                <span data-testid={`following-username-${user.id}`}>{user.user_name}</span>
+                <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden mr-3">
+                  {user.profile_img_path ? (
+                    <img
+                      src={user.profile_img_path}
+                      alt={`${user.user_name}'s profile`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-lg font-bold text-gray-600">
+                      {user.user_name?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  )}
+                </div>
+                <span>{user.user_name}</span>
               </div>
               {currentUserId !== user.id && (
                 <FollowButton
