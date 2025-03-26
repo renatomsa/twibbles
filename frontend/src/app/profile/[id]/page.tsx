@@ -33,8 +33,8 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                 const profileId = Number(params.id);
 
                 const response = await apiService.get<User>(`user/get_user_by_id/${profileId}`);
-                setProfile(response.data);
-                const isCurrentUserProfile = currentId === response.data.id;
+                setProfile(response.data || null);
+                const isCurrentUserProfile = currentId === response?.data?.id;
                 setIsCurrentUser(isCurrentUserProfile);
 
                 if (!isCurrentUserProfile) {
@@ -42,7 +42,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                     setIsFollowing(followsResponse.data as boolean);
                 }
 
-                setCanViewProfile(isCurrentUserProfile || !response.data.is_private || isFollowing);
+                setCanViewProfile(isCurrentUserProfile || !response?.data?.is_private || isFollowing);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Erro ao carregar perfil:', error);
