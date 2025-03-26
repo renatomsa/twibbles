@@ -11,11 +11,11 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response) {
-            console.error('Erro na resposta:', error.response.data);
+            console.error('Error response:', error.response.data);
         } else if (error.request) {
-            console.error('Erro na requisição:', error.request);
+            console.error('Error request:', error.request);
         } else {
-            console.error('Erro:', error.message);
+            console.error('Error:', error.message);
         }
         return Promise.reject(error);
     }
@@ -53,7 +53,7 @@ export const apiService = {
     },
 
     // PATCH request
-    patch: async <T>(url: string, data: any): Promise<ApiResponse<T>> => {
+    patch: async <T>(url: string, data?: any): Promise<ApiResponse<T>> => {
         const response = await api.patch(url, data);
         return response.data;
     }

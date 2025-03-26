@@ -19,16 +19,29 @@ def get_comments_by_post_id(post_id: int) -> HttpResponseModel:
                     message="Post not found"
                 )
 
-            statement = select(Comment).where(Comment.post_id == post_id)
-            comments = session.execute(statement).scalars().all()
+            # Join Comment with User to get user_name
+            statement = (
+                select(Comment, User)
+                .join(User, User.id == Comment.user_id)
+                .where(Comment.post_id == post_id)
+            )
+            results = session.execute(statement).fetchall()
 
-            if not comments:
+            if not results:
                 return HttpResponseModel(
                     status_code=404,
                     message="No comments found for this post"
                 )
 
-            comment_list = [CommentRead.model_validate(c) for c in comments]
+            comment_list = []
+            for result in results:
+                comment = result.Comment
+                user = result.User
+
+                # Create a CommentRead object and add user_name
+                comment_data = CommentRead.model_validate(comment).model_dump()
+                comment_data["user_name"] = user.user_name
+                comment_list.append(comment_data)
 
             return HttpResponseModel(
                 status_code=200,

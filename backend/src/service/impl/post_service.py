@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from model.sqlalchemy.user import User
 from model.sqlalchemy.post import Post
 from model.pydantic.post import Post as PostPydantic
+from model.pydantic.post import PostWithUser
 from model.pydantic.post import CreatePost as CreatePostPydantic
 from src.service.impl import follow_service
 from model.sqlalchemy.comment import Comment
@@ -26,12 +27,18 @@ def get_posts(user_id: int):
                 return HttpResponseModel(status_code=404, message="No posts were found")
 
             result = []
-            for p in posts:
-                p = p.Post
-                post = PostPydantic(id=p.id,
-                                    user_id=p.user_id,
-                                    text=p.text,
-                                    date_time=p.date_time).model_dump()
+            for entry in posts:
+                p = entry.Post
+                u = entry.User
+                post = PostWithUser(
+                    id=p.id,
+                    user_id=p.user_id,
+                    text=p.text,
+                    date_time=p.date_time,
+                    location=p.location if p.location else None,
+                    hashtags=p.hashtags if p.hashtags else None,
+                    user_name=u.user_name
+                ).model_dump()
                 result.append(post)
 
             return HttpResponseModel(status_code=200,
@@ -39,10 +46,18 @@ def get_posts(user_id: int):
                                      data=result)
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
-    
+
 def get_posts_sorted_by_comment(user_id: int):
     try:
         with Session(postgresql_engine) as session:
+            # Get the user to include user_name in response
+            user = session.get(User, user_id)
+            if not user:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="User not found"
+                )
+
             statement = (
                 select(Post.text, Post.date_time, Comment.post_id, func.count(Comment.id).label("comment_count"))
                 .join(Post, Post.id == Comment.post_id)
@@ -54,14 +69,17 @@ def get_posts_sorted_by_comment(user_id: int):
             result_posts = []
             result_comments = []
             for p in posts:
-                post = PostPydantic(
-                                    id=p.post_id,
-                                    user_id=user_id,
-                                    text=p.text,
-                                    date_time=p.date_time).model_dump()
+                # Use PostWithUser to combine Post and User information
+                post = PostWithUser(
+                    id=p.post_id,
+                    user_id=user_id,
+                    text=p.text,
+                    date_time=p.date_time,
+                    user_name=user.user_name
+                ).model_dump()
                 result_posts.append(post)
                 result_comments.append(p.comment_count)
-    
+
             if posts is None:
                 return HttpResponseModel(status_code=404, message="No posts were found")
             return HttpResponseModel(status_code=200,
@@ -85,7 +103,7 @@ def delete_post(user_id: int, post_id: int):
 
             if post.user_id != user_id:
                 return HttpResponseModel(status_code=403, message="Unauthorized to delete post")
-            
+
             session.execute(delete(Comment).where(Comment.post_id == post_id))
             session.delete(post)
             session.commit()
@@ -159,6 +177,14 @@ def get_posts_by_hashtag(hashtag: str) -> HttpResponseModel:
 def create_post(user_id: int, data: dict) -> HttpResponseModel:
     try:
         with Session(postgresql_engine) as session:
+            # Get the user to include user_name in response
+            user = session.get(User, user_id)
+            if not user:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="User not found"
+                )
+
             post = Post(user_id=user_id,
                         text=data["text"],
                         location=data["location"],
@@ -167,17 +193,21 @@ def create_post(user_id: int, data: dict) -> HttpResponseModel:
             session.commit()
             session.refresh(post)
 
-            post = PostPydantic(id=post.id,
-                                user_id=post.user_id,
-                                text=post.text,
-                                location=post.location,
-                                hashtags=post.hashtags,
-                                date_time=post.date_time
-                                ).model_dump()
+            # Use PostWithUser to combine Post and User information
+            post_with_user = PostWithUser(
+                id=post.id,
+                user_id=post.user_id,
+                text=post.text,
+                date_time=post.date_time,
+                location=post.location,
+                hashtags=post.hashtags,
+                user_name=user.user_name
+            ).model_dump()
+
             return HttpResponseModel(
                 status_code=201,
                 message="Post created",
-                data=post
+                data=post_with_user
             )
     except Exception as e:
         return HttpResponseModel(
@@ -233,10 +263,10 @@ def get_dashboard_data(user_id: int, period: int) -> HttpResponseModel:
             comment_avg = sum(comment_counts) / len(comment_counts) if len(comment_counts) > 0 else 0
             if not comment_counts:
                 return HttpResponseModel(status_code=404, message="No comments were found")
-            
+
             statement = (
                 select(
-                    cast(Comment.created_at, Date).label("comment_date"), 
+                    cast(Comment.created_at, Date).label("comment_date"),
                     func.count(Comment.id).label("comment_count")
                 )
                 .join(Post, Post.id == Comment.post_id)
@@ -253,12 +283,57 @@ def get_dashboard_data(user_id: int, period: int) -> HttpResponseModel:
 
             if not result:
                 return HttpResponseModel(status_code=404, message="No comments were found")
-            
+
             return HttpResponseModel(
                 status_code=200,
                 message="Dashboard ready",
                 data={"comment_avg": comment_avg, "comments": result}
             )
-    
+
     except Exception as e:
         return HttpResponseModel(status_code=500, message=str(e))
+
+def get_public_posts() -> HttpResponseModel:
+    try:
+        with Session(postgresql_engine) as session:
+            # Join Post with User and get only posts from non-private users
+            statement = (
+                select(Post, User)
+                .join(User, User.id == Post.user_id)
+                .where(User.is_private == False)
+                .order_by(Post.date_time.desc())
+            )
+            posts = session.execute(statement).fetchall()
+
+            if not posts:
+                return HttpResponseModel(
+                    status_code=404,
+                    message="No public posts found"
+                )
+
+            result = []
+            for entry in posts:
+                p = entry.Post
+                u = entry.User
+                # Use PostWithUser instead of adding user_name to Post
+                post = PostWithUser(
+                    id=p.id,
+                    user_id=p.user_id,
+                    text=p.text,
+                    date_time=p.date_time,
+                    location=p.location if p.location else None,
+                    hashtags=p.hashtags if p.hashtags else None,
+                    user_name=u.user_name
+                ).model_dump()
+                result.append(post)
+
+            return HttpResponseModel(
+                status_code=200,
+                message="Public posts retrieved successfully",
+                data=result
+            )
+    except Exception as e:
+        return HttpResponseModel(
+            status_code=500,
+            message=str(e)
+        )
