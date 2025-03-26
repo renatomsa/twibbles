@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.0.2",
+    "@types/js-cookie": "^3.0.6",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.292.0",
     "next": "^14.2.20",
     "react": "^18",

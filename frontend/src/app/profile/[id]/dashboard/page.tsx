@@ -1,7 +1,7 @@
 // app/dashboard/page.tsx
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import DashboardChart from "@/components/profile/dashboardChart";
 import { useDashboard } from "@/lib/hooks/useDashboard";
 
@@ -16,6 +16,12 @@ const PERIOD_OPTIONS: PeriodOption[] = [
   { value: 365, label: "Último Ano" }
 ];
 
+async function getInitialData(): Promise<number> {
+  const response = await fetch('/api/auth/current-user');
+  const { userId } = await response.json();
+  return Number(userId);
+}
+
 // Helper function to format date in local timezone
 const formatDateToLocal = (date: Date) => {
   const year = date.getFullYear();
@@ -24,11 +30,31 @@ const formatDateToLocal = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-export default function DashboardPage() {
-  const userId = 2007;
+export default function DashboardPage({ params }: { params: { id: string } }) {
+  const profileId = Number(params.id);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [period, setPeriod] = useState<number>(7);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const { data, loading, error } = useDashboard(userId, period);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const currentId = await getInitialData();
+        setCurrentUserId(currentId);
+        setIsCurrentUser(currentId === profileId);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Erro ao obter dados do usuário:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [profileId]);
+
+  const { data, loading: dataLoading, error } = useDashboard(profileId, period);
+  const loading = isLoading || dataLoading;
 
   const chartData = useMemo(() => {
     if (!data?.comments) return [];
@@ -87,26 +113,41 @@ export default function DashboardPage() {
     }
   }, [data, period]);
 
-  return (
-    <main className="p-8 bg-gray-900 min-h-screen text-white">
-      <div className="flex flex-col items-center max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-blue-300">Estatísticas de desempenho</h1>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#FFFFFF]">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2D2D2D] mx-auto"></div>
+          <p className="mt-4 text-[#2D2D2D]">Carregando dados...</p>
+        </div>
+      </div>
+    );
+  }
 
-        {loading && (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-gray-400">Carregando dados...</p>
-          </div>
-        )}
-        
+  // Verifica se o usuário atual pode ver o dashboard (apenas o próprio usuário pode ver)
+  if (!isCurrentUser && currentUserId) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#FFFFFF]">
+        <div className="text-[#2D2D2D] text-center">
+          <h2 className="text-xl font-semibold mb-4">Acesso negado</h2>
+          <p>Você não tem permissão para visualizar este dashboard.</p>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <main className="p-8 bg-[#FFFFFF] min-h-screen text-[#2D2D2D] mt-16">
+      <div className="flex flex-col items-center max-w-6xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8 text-cyan-900">Estatísticas de desempenho</h1>
+  
         {error && (
-          <div className="bg-red-900/30 text-red-300 px-6 py-4 rounded-lg">
-            <p className="text-center">Erro: {error}</p>
+          <div className="bg-[#FFFFFF] text-white-600 px-6 py-4 rounded-lg">
+            <p className="text-center">{error}</p>
           </div>
         )}
         
         {!loading && !error && (!data || chartData.length === 0) && (
-          <div className="bg-gray-800/50 text-gray-400 px-6 py-4 rounded-lg">
+          <div className="bg-[#2D2D2D] text-[#FFFFFF] px-6 py-4 rounded-lg">
             <p className="text-center">Nenhum dado disponível para o período selecionado</p>
           </div>
         )}
@@ -126,8 +167,8 @@ export default function DashboardPage() {
               onClick={() => setPeriod(option.value)}
               className={`px-6 py-3 rounded-lg transition-all duration-200 ${
                 period === option.value 
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" 
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
+                  ? "bg-[#2D2D2D] text-[#FFFFFF] shadow-sm" 
+                  : "bg-[#E0E0E0] text-[#2D2D2D] hover:bg-[#D0D0D0]"
               }`}
             >
               {option.label}
