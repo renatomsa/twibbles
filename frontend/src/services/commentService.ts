@@ -121,6 +121,14 @@ export const commentService = {
       const response = await apiService.delete<any>(`/comments/user/${userId}/comment/${commentId}`);
       console.log('Delete comment response:', response);
 
+      // If we get a 404, the comment may have already been deleted
+      if (response && response.status_code === 404) {
+        console.log('Comment not found. It may have been already deleted.');
+        // We'll return true since the comment is gone from the database anyway
+        // This will allow the UI to remove the comment from the list
+        return true;
+      }
+
       return response && response.status_code === 200;
     } catch (error) {
       console.error('Error deleting comment:', error);

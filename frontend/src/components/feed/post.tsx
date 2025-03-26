@@ -1,8 +1,10 @@
-import { MessageCircle, MapPin, Hash } from "lucide-react";
+import { MessageCircle, MapPin, Hash, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Comment, commentService } from "@/services/commentService";
+import { postService } from "@/services/postService";
 import CommentComponent from "./Comment";
 import CommentForm from "./CommentForm";
+import DeletePostModal from "./DeletePostModal";
 
 interface PostProps {
   post_id: number;
@@ -13,6 +15,8 @@ interface PostProps {
   currentUserName?: string;
   location?: string;
   hashtags?: string;
+  profile_img_path?: string;
+  onDelete?: (postId: number) => void;
 }
 
 const Post: React.FC<PostProps> = ({
@@ -23,12 +27,15 @@ const Post: React.FC<PostProps> = ({
   currentUserId,
   currentUserName = `User #${currentUserId}`,
   location,
-  hashtags
+  hashtags,
+  profile_img_path,
+  onDelete
 }) => {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const toggleComments = async () => {
     const newShowComments = !showComments;
@@ -86,13 +93,41 @@ const Post: React.FC<PostProps> = ({
 
       if (success) {
         console.log('Comment deleted successfully');
-        setComments(prev => prev.filter(comment => comment.id !== commentId));
+        // Remove the comment from the UI
+        setComments(prev => prev.filter(comment => {
+          const id = comment.id ||
+            (Array.isArray(comment) ?
+              comment.find(item => Array.isArray(item) && item[0] === 'id')?.[1] :
+              null);
+          return id !== commentId;
+        }));
       } else {
         setCommentError("Failed to delete comment. Please try again.");
+        // Auto-clear error after 3 seconds
+        setTimeout(() => setCommentError(null), 3000);
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
       setCommentError("An error occurred while deleting the comment.");
+      // Auto-clear error after 3 seconds
+      setTimeout(() => setCommentError(null), 3000);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    try {
+      const success = await postService.deletePost(currentUserId, post_id);
+
+      if (success) {
+        console.log('Post deleted successfully');
+        if (onDelete) {
+          onDelete(post_id);
+        }
+      } else {
+        console.error('Failed to delete post');
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
     }
   };
 
@@ -116,8 +151,34 @@ const Post: React.FC<PostProps> = ({
   };
 
   return (
-    <div className="bg-gray-200 rounded-md p-4 shadow-sm">
-      <h3 className="font-semibold text-lg text-gray-800">{user_name}</h3>
+    <div className="bg-gray-200 rounded-md p-4 shadow-sm relative">
+      <div className="flex items-center mb-3">
+        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden mr-3">
+          {profile_img_path ? (
+            <img
+              src={profile_img_path}
+              alt={`${user_name}'s profile`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-lg font-bold text-gray-600">
+              {user_name.charAt(0).toUpperCase()}
+            </span>
+          )}
+        </div>
+        <h3 className="font-semibold text-lg text-gray-800">{user_name}</h3>
+
+        {/* Show delete button only if current user is the post owner */}
+        {currentUserId === user_id && (
+          <button
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+            aria-label="Delete post"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
+      </div>
       <p className="my-2 text-gray-700">{post_text}</p>
 
       {/* Location and hashtags */}
@@ -182,6 +243,19 @@ const Post: React.FC<PostProps> = ({
           </div>
         </div>
       )}
+
+      {/* Delete Post Modal */}
+      <DeletePostModal
+        isOpen={isDeleteModalOpen}
+        postId={post_id}
+        userId={currentUserId}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDeleted={(postId) => {
+          if (onDelete) {
+            onDelete(postId);
+          }
+        }}
+      />
     </div>
   );
 };

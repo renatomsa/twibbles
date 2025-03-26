@@ -278,6 +278,11 @@ export default function SearchPage() {
                                     currentUserId={currentUserId}
                                     location={post.location}
                                     hashtags={post.hashtags}
+                                    profile_img_path={post.profile_img_path}
+                                    onDelete={(postId) => {
+                                        // Remove the deleted post from the list
+                                        setPosts(prev => prev.filter(p => p.id !== postId));
+                                    }}
                                 />
                             </div>
                         ))

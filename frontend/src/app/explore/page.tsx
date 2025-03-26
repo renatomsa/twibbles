@@ -76,11 +76,16 @@ export default function ExplorePage() {
                 <Post
                   post_id={post.id}
                   user_id={post.user_id}
-                  user_name={post.user_name || `Anonymous User #${post.user_id}`}
+                  user_name={post.user_name || `User #${post.user_id}`}
                   post_text={post.text}
                   currentUserId={currentUserId}
                   location={post.location}
                   hashtags={post.hashtags}
+                  profile_img_path={post.profile_img_path}
+                  onDelete={(postId) => {
+                    // Remove the deleted post from the list
+                    setPosts(prev => prev.filter(p => p.id !== postId));
+                  }}
                 />
               </div>
             ))}

@@ -152,6 +152,11 @@ const User = () => {
                   currentUserName={userName}
                   location={post.location}
                   hashtags={post.hashtags}
+                  profile_img_path={post.profile_img_path}
+                  onDelete={(postId) => {
+                    // Remove the deleted post from the list
+                    setPostList(prev => prev.filter(p => p.id !== postId));
+                  }}
                 />
               </div>
             ))}
