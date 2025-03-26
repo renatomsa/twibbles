@@ -162,26 +162,41 @@ def get_posts_by_location(location: str) -> HttpResponseModel:
 def get_posts_by_hashtag(hashtag: str) -> HttpResponseModel:
     try:
         with Session(postgresql_engine) as session:
-            # Exemplo de busca por substring (caso 'hashtags' armazene "#foo #bar #baz")
+            # Join Post with User to get user information including username
             stmt = (
-                select(Post)
+                select(Post, User)
+                .join(User, User.id == Post.user_id)
                 .where(Post.hashtags.ilike(f"%{hashtag}%"))
                 .order_by(Post.date_time.desc())
             )
-            posts = session.execute(stmt).scalars().all()
+            results = session.execute(stmt).fetchall()
 
-            if not posts:
+            if not results:
                 return HttpResponseModel(
                     status_code=404,
                     message="No posts found for this hashtag"
                 )
 
-            post_list = [PostPydantic.model_validate(p) for p in posts]
+            # Process posts with user data
+            result = []
+            for entry in results:
+                p = entry.Post
+                u = entry.User
+                post = PostWithUser(
+                    id=p.id,
+                    user_id=p.user_id,
+                    text=p.text,
+                    date_time=p.date_time,
+                    location=p.location if p.location else None,
+                    hashtags=p.hashtags if p.hashtags else None,
+                    user_name=u.user_name
+                ).model_dump()
+                result.append(post)
 
             return HttpResponseModel(
                 status_code=200,
                 message="Posts found",
-                data=post_list
+                data=result
             )
     except Exception as e:
         return HttpResponseModel(

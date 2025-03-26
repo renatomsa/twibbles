@@ -5,7 +5,7 @@ import { User } from '@/types/user';
 import { Search, MapPin, Hash, Users, X } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Post as PostType } from '@/services/postService';
+import { Post as PostType, postService } from '@/services/postService';
 import Post from '@/components/feed/post';
 
 export default function SearchPage() {
@@ -85,22 +85,14 @@ export default function SearchPage() {
             } else if (searchType === 'location') {
                 try {
                     console.log(`Searching for location: ${term}`);
-                    const response = await apiService.get<PostType[]>(`/post/location?location=${encodeURIComponent(term)}`);
-                    console.log('Location search response:', response);
+                    const posts = await postService.getPostsByLocation(term);
+                    console.log('Location search results:', posts);
 
-                    // Successfully got data
-                    if (response && response.status_code === 200 && response.data) {
-                        setPosts(response.data);
+                    if (posts && posts.length > 0) {
+                        setPosts(posts);
                         setUsers([]);
-                    }
-                    // Properly handle "not found" responses
-                    else if (response && response.status_code === 404) {
+                    } else {
                         console.log('No posts found for location:', term);
-                        setPosts([]);
-                        setUsers([]);
-                    }
-                    // Handle other responses
-                    else {
                         setPosts([]);
                         setUsers([]);
                     }
@@ -111,22 +103,14 @@ export default function SearchPage() {
             } else if (searchType === 'hashtag') {
                 try {
                     console.log(`Searching for hashtag: ${term}`);
-                    const response = await apiService.get<PostType[]>(`/post/hashtag?hashtag=${encodeURIComponent(term)}`);
-                    console.log('Hashtag search response:', response);
+                    const posts = await postService.getPostsByHashtag(term);
+                    console.log('Hashtag search results:', posts);
 
-                    // Successfully got data
-                    if (response && response.status_code === 200 && response.data) {
-                        setPosts(response.data);
+                    if (posts && posts.length > 0) {
+                        setPosts(posts);
                         setUsers([]);
-                    }
-                    // Properly handle "not found" responses
-                    else if (response && response.status_code === 404) {
+                    } else {
                         console.log('No posts found for hashtag:', term);
-                        setPosts([]);
-                        setUsers([]);
-                    }
-                    // Handle other responses
-                    else {
                         setPosts([]);
                         setUsers([]);
                     }
