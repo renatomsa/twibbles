@@ -115,4 +115,38 @@ export const postService = {
       return false;
     }
   },
+
+  // Get posts by hashtag
+  getPostsByHashtag: async (hashtag: string): Promise<Post[]> => {
+    try {
+      const response = await apiService.get<Post[]>(`/post/hashtag`, { hashtag });
+      console.log('Hashtag search response:', response);
+
+      if (response && response.status_code === 200 && response.data) {
+        return response.data;
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error fetching posts by hashtag:', error);
+      return [];
+    }
+  },
+
+  // Get posts by location
+  getPostsByLocation: async (location: string): Promise<Post[]> => {
+    try {
+      const response = await apiService.get<Post[]>(`/post/location`, { location });
+      console.log('Location search response:', response);
+
+      if (response && response.status_code === 200 && response.data) {
+        return response.data;
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error fetching posts by location:', error);
+      return [];
+    }
+  },
 };

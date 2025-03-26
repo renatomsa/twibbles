@@ -5,6 +5,7 @@ import { postService } from "@/services/postService";
 import CommentComponent from "./Comment";
 import CommentForm from "./CommentForm";
 import DeletePostModal from "./DeletePostModal";
+import Link from "next/link";
 
 interface PostProps {
   post_id: number;
@@ -153,20 +154,22 @@ const Post: React.FC<PostProps> = ({
   return (
     <div className="bg-gray-200 rounded-md p-4 shadow-sm relative">
       <div className="flex items-center mb-3">
-        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden mr-3">
-          {profile_img_path ? (
-            <img
-              src={profile_img_path}
-              alt={`${user_name}'s profile`}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-lg font-bold text-gray-600">
-              {user_name.charAt(0).toUpperCase()}
-            </span>
-          )}
-        </div>
-        <h3 className="font-semibold text-lg text-gray-800">{user_name}</h3>
+        <Link href={`/profile/${user_id}`} className="flex items-center">
+          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden mr-3 cursor-pointer hover:opacity-80 transition-opacity">
+            {profile_img_path ? (
+              <img
+                src={profile_img_path}
+                alt={`${user_name}'s profile`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-lg font-bold text-gray-600">
+                {user_name.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <h3 className="font-semibold text-lg text-gray-800 hover:underline">{user_name}</h3>
+        </Link>
 
         {/* Show delete button only if current user is the post owner */}
         {currentUserId === user_id && (
