@@ -1,4 +1,4 @@
-import { Heart, MessageCircle } from "lucide-react";
+import { MessageCircle, MapPin, Hash } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Comment, commentService } from "@/services/commentService";
 import CommentComponent from "./Comment";
@@ -11,6 +11,8 @@ interface PostProps {
   post_text: string;
   currentUserId: number;
   currentUserName?: string;
+  location?: string;
+  hashtags?: string;
 }
 
 const Post: React.FC<PostProps> = ({
@@ -19,17 +21,14 @@ const Post: React.FC<PostProps> = ({
   user_name,
   post_text,
   currentUserId,
-  currentUserName = `User #${currentUserId}`
+  currentUserName = `User #${currentUserId}`,
+  location,
+  hashtags
 }) => {
-  const [liked, setLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
-
-  const toggleLike = () => {
-    setLiked(!liked);
-  };
 
   const toggleComments = async () => {
     const newShowComments = !showComments;
@@ -104,22 +103,41 @@ const Post: React.FC<PostProps> = ({
     }
   }, [post_id, showComments]);
 
+  // Format hashtags for display
+  const formatHashtags = (hashtags: string) => {
+    // If hashtags already start with #, just return them
+    if (hashtags.startsWith('#')) {
+      return hashtags;
+    }
+
+    // Otherwise, add # to each hashtag separated by spaces
+    const tags = hashtags.split(' ').map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+    return tags.join(' ');
+  };
+
   return (
     <div className="bg-gray-200 rounded-md p-4 shadow-sm">
       <h3 className="font-semibold text-lg text-gray-800">{user_name}</h3>
       <p className="my-2 text-gray-700">{post_text}</p>
 
-      <div className="flex items-center mt-3 space-x-4">
-        <button
-          onClick={toggleLike}
-          className="flex items-center text-gray-500 hover:text-red-500"
-        >
-          <Heart
-            size={18}
-            className={liked ? "fill-red-500 text-red-500" : ""}
-          />
-        </button>
+      {/* Location and hashtags */}
+      <div className="mt-2 mb-3">
+        {location && (
+          <div className="flex items-center text-sm text-gray-500 mb-1">
+            <MapPin size={14} className="mr-1" />
+            <span>{location}</span>
+          </div>
+        )}
 
+        {hashtags && (
+          <div className="flex items-center text-sm text-cyan-600 flex-wrap">
+            <Hash size={14} className="mr-1" />
+            <span className="hover:underline">{formatHashtags(hashtags)}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center mt-3 space-x-4">
         <button
           onClick={toggleComments}
           className="flex items-center text-gray-500 hover:text-blue-500"

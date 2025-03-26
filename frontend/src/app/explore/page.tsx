@@ -79,6 +79,8 @@ export default function ExplorePage() {
                   user_name={post.user_name || `Anonymous User #${post.user_id}`}
                   post_text={post.text}
                   currentUserId={currentUserId}
+                  location={post.location}
+                  hashtags={post.hashtags}
                 />
               </div>
             ))}
