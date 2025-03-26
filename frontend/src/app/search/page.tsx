@@ -1,12 +1,12 @@
 'use client';
 
-import { apiService } from '@/lib/api';
-import { User } from '@/types/user';
-import { Search, MapPin, Hash, Users, X } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { Post as PostType, postService } from '@/services/postService';
 import Post from '@/components/feed/post';
+import { apiService } from '@/lib/api';
+import { postService, Post as PostType } from '@/services/postService';
+import { User } from '@/types/user';
+import { Hash, MapPin, Search, Users, X } from 'lucide-react';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
 
 export default function SearchPage() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -148,13 +148,14 @@ export default function SearchPage() {
                 <h1 className="text-2xl font-bold mb-6 text-gray-800">Search</h1>
 
                 {/* Search Type Selector */}
-                <div className="flex mb-4 space-x-2 overflow-x-auto pb-1">
+                <div className="flex mb-4 space-x-2 overflow-x-auto pb-1" data-testid="search-type-selector">
                     <button
                         onClick={() => setSearchType('users')}
                         className={`flex items-center px-4 py-2 rounded-md ${searchType === 'users'
                             ? 'bg-cyan-900 text-white'
                             : 'bg-white text-gray-700 hover:bg-gray-50'
                             } transition-colors`}
+                        data-testid="users-search-button"
                     >
                         <Users size={18} className="mr-2" />
                         Users
@@ -165,6 +166,7 @@ export default function SearchPage() {
                             ? 'bg-cyan-900 text-white'
                             : 'bg-white text-gray-700 hover:bg-gray-50'
                             } transition-colors`}
+                        data-testid="location-search-button"
                     >
                         <MapPin size={18} className="mr-2" />
                         Location
@@ -175,6 +177,7 @@ export default function SearchPage() {
                             ? 'bg-cyan-900 text-white'
                             : 'bg-white text-gray-700 hover:bg-gray-50'
                             } transition-colors`}
+                        data-testid="hashtag-search-button"
                     >
                         <Hash size={18} className="mr-2" />
                         Hashtag
@@ -198,6 +201,7 @@ export default function SearchPage() {
                                             : "Search by hashtag..."
                                 }
                                 className="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 pr-10"
+                                data-testid="search-input"
                             />
                             {searchTerm && (
                                 <button
@@ -232,6 +236,8 @@ export default function SearchPage() {
                                 key={user.id}
                                 href={`/profile/${user.id}`}
                                 className="flex items-center space-x-4 p-4 bg-white rounded-md shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+                                data-testid="user-search-result"
+                                data-username={user.user_name}
                             >
                                 <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
                                     {user.profile_img_path ? (
@@ -239,6 +245,7 @@ export default function SearchPage() {
                                             src={user.profile_img_path}
                                             alt={`${user.user_name}'s profile`}
                                             className="w-full h-full object-cover"
+                                            data-testid="user-profile-picture"
                                         />
                                     ) : (
                                         <span className="text-lg font-bold text-gray-600">
@@ -246,7 +253,7 @@ export default function SearchPage() {
                                         </span>
                                     )}
                                 </div>
-                                <span className="text-gray-800 font-medium">
+                                <span className="text-gray-800 font-medium" data-testid="user-username">
                                     {user.user_name}
                                 </span>
                             </Link>
@@ -263,8 +270,10 @@ export default function SearchPage() {
                                     location={post.location}
                                     hashtags={post.hashtags}
                                     profile_img_path={post.profile_img_path}
+                                    data-testid="post-item"
+                                    data-location={post.location}
+                                    data-hashtags={Array.isArray(post.hashtags) ? post.hashtags.join(',') : post.hashtags}
                                     onDelete={(postId) => {
-                                        // Remove the deleted post from the list
                                         setPosts(prev => prev.filter(p => p.id !== postId));
                                     }}
                                 />
@@ -272,7 +281,7 @@ export default function SearchPage() {
                         ))
                     ) : searchTerm && searchTerm.length >= 2 && hasSearched && !isSearching ? (
                         <div className="flex justify-center py-8">
-                            <p className="text-gray-500">
+                            <p className="text-gray-500" data-testid="no-results-message">
                                 {searchType === 'users'
                                     ? "No users found"
                                     : searchType === 'location'
