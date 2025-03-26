@@ -83,13 +83,12 @@ const User = () => {
     setIsFormVisible((prev) => !prev);
   };
 
-  const handlePostSubmit = async (postContent: string) => {
+  const handlePostSubmit = async (postContent: string, location: string, hashtags: string) => {
     try {
       setError(null);
 
-      // Create a new post in the backend
-      // The text parameter is required, location and hashtags are optional
-      const newPost = await postService.createPost(currentUserId, postContent);
+      // Create a new post in the backend with location and hashtags
+      const newPost = await postService.createPost(currentUserId, postContent, location, hashtags);
 
       if (newPost) {
         // Add the new post to the list
@@ -128,6 +127,12 @@ const User = () => {
         {isFormVisible && (
           <div className="mb-6 p-4">
             <CreatePost userName={userName} onPostSubmit={handlePostSubmit} />
+            <button
+              onClick={toggleFormVisibility}
+              className="mt-2 text-gray-500 hover:text-gray-700"
+            >
+              Cancel
+            </button>
           </div>
         )}
 
@@ -150,6 +155,13 @@ const User = () => {
                   post_text={post.text}
                   currentUserId={currentUserId}
                   currentUserName={userName}
+                  location={post.location}
+                  hashtags={post.hashtags}
+                  profile_img_path={post.profile_img_path}
+                  onDelete={(postId) => {
+                    // Remove the deleted post from the list
+                    setPostList(prev => prev.filter(p => p.id !== postId));
+                  }}
                 />
               </div>
             ))}

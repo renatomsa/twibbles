@@ -1,8 +1,11 @@
-import { Heart, MessageCircle } from "lucide-react";
+import { MessageCircle, MapPin, Hash, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Comment, commentService } from "@/services/commentService";
+import { postService } from "@/services/postService";
 import CommentComponent from "./Comment";
 import CommentForm from "./CommentForm";
+import DeletePostModal from "./DeletePostModal";
+import Link from "next/link";
 
 interface PostProps {
   post_id: number;
@@ -11,6 +14,10 @@ interface PostProps {
   post_text: string;
   currentUserId: number;
   currentUserName?: string;
+  location?: string;
+  hashtags?: string;
+  profile_img_path?: string;
+  onDelete?: (postId: number) => void;
 }
 
 const Post: React.FC<PostProps> = ({
@@ -19,17 +26,17 @@ const Post: React.FC<PostProps> = ({
   user_name,
   post_text,
   currentUserId,
-  currentUserName = `User #${currentUserId}`
+  currentUserName = `User #${currentUserId}`,
+  location,
+  hashtags,
+  profile_img_path,
+  onDelete
 }) => {
-  const [liked, setLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
-
-  const toggleLike = () => {
-    setLiked(!liked);
-  };
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const toggleComments = async () => {
     const newShowComments = !showComments;
@@ -87,13 +94,41 @@ const Post: React.FC<PostProps> = ({
 
       if (success) {
         console.log('Comment deleted successfully');
-        setComments(prev => prev.filter(comment => comment.id !== commentId));
+        // Remove the comment from the UI
+        setComments(prev => prev.filter(comment => {
+          const id = comment.id ||
+            (Array.isArray(comment) ?
+              comment.find(item => Array.isArray(item) && item[0] === 'id')?.[1] :
+              null);
+          return id !== commentId;
+        }));
       } else {
         setCommentError("Failed to delete comment. Please try again.");
+        // Auto-clear error after 3 seconds
+        setTimeout(() => setCommentError(null), 3000);
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
       setCommentError("An error occurred while deleting the comment.");
+      // Auto-clear error after 3 seconds
+      setTimeout(() => setCommentError(null), 3000);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    try {
+      const success = await postService.deletePost(currentUserId, post_id);
+
+      if (success) {
+        console.log('Post deleted successfully');
+        if (onDelete) {
+          onDelete(post_id);
+        }
+      } else {
+        console.error('Failed to delete post');
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
     }
   };
 
@@ -104,22 +139,69 @@ const Post: React.FC<PostProps> = ({
     }
   }, [post_id, showComments]);
 
+  // Format hashtags for display
+  const formatHashtags = (hashtags: string) => {
+    // If hashtags already start with #, just return them
+    if (hashtags.startsWith('#')) {
+      return hashtags;
+    }
+
+    // Otherwise, add # to each hashtag separated by spaces
+    const tags = hashtags.split(' ').map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+    return tags.join(' ');
+  };
+
   return (
-    <div className="bg-gray-200 rounded-md p-4 shadow-sm">
-      <h3 className="font-semibold text-lg text-gray-800">{user_name}</h3>
+    <div className="bg-gray-200 rounded-md p-4 shadow-sm relative">
+      <div className="flex items-center mb-3">
+        <Link href={`/profile/${user_id}`} className="flex items-center">
+          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden mr-3 cursor-pointer hover:opacity-80 transition-opacity">
+            {profile_img_path ? (
+              <img
+                src={profile_img_path}
+                alt={`${user_name}'s profile`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-lg font-bold text-gray-600">
+                {user_name.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <h3 className="font-semibold text-lg text-gray-800 hover:underline">{user_name}</h3>
+        </Link>
+
+        {/* Show delete button only if current user is the post owner */}
+        {currentUserId === user_id && (
+          <button
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+            aria-label="Delete post"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
+      </div>
       <p className="my-2 text-gray-700">{post_text}</p>
 
-      <div className="flex items-center mt-3 space-x-4">
-        <button
-          onClick={toggleLike}
-          className="flex items-center text-gray-500 hover:text-red-500"
-        >
-          <Heart
-            size={18}
-            className={liked ? "fill-red-500 text-red-500" : ""}
-          />
-        </button>
+      {/* Location and hashtags */}
+      <div className="mt-2 mb-3">
+        {location && (
+          <div className="flex items-center text-sm text-gray-500 mb-1">
+            <MapPin size={14} className="mr-1" />
+            <span>{location}</span>
+          </div>
+        )}
 
+        {hashtags && (
+          <div className="flex items-center text-sm text-cyan-600 flex-wrap">
+            <Hash size={14} className="mr-1" />
+            <span className="hover:underline">{formatHashtags(hashtags)}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center mt-3 space-x-4">
         <button
           onClick={toggleComments}
           className="flex items-center text-gray-500 hover:text-blue-500"
@@ -164,6 +246,19 @@ const Post: React.FC<PostProps> = ({
           </div>
         </div>
       )}
+
+      {/* Delete Post Modal */}
+      <DeletePostModal
+        isOpen={isDeleteModalOpen}
+        postId={post_id}
+        userId={currentUserId}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDeleted={(postId) => {
+          if (onDelete) {
+            onDelete(postId);
+          }
+        }}
+      />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { apiService } from '@/lib/api';
 import { User } from '@/types/user';
 import React, { useEffect, useState } from 'react';
 import FollowButton from './FollowButton';
+import Link from 'next/link';
 
 interface FollowingTabProps {
   userId: number;
@@ -37,21 +38,35 @@ const FollowingTab: React.FC<FollowingTabProps> = ({ userId, currentUserId }) =>
   }
 
   return (
-    <div className="following-container">
-      <h2 className="text-xl font-bold mb-4">Following</h2>
+    <div className="following-container" data-testid="following-tab">
+      <h2 className="text-xl font-bold mb-4" data-testid="following-heading">Following</h2>
       {following.length === 0 ? (
-        <p>Not following anyone yet</p>
+        <p data-testid="no-following-message">Not following anyone yet</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-4" data-testid="following-list">
           {following.map((user) => (
-            <li key={user.id} className="flex items-center justify-between p-3 border rounded">
+            <li
+              key={user.id}
+              className="flex items-center justify-between p-3 border rounded"
+              data-testid={`following-item-${user.id}`}
+            >
               <div className="flex items-center">
-                <img
-                  src={user.profile_img_path}
-                  alt="User avatar"
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-                <span>{user.user_name}</span>
+                <Link href={`/profile/${user.id}`} className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden mr-3 cursor-pointer hover:opacity-80 transition-opacity">
+                    {user.profile_img_path ? (
+                      <img
+                        src={user.profile_img_path}
+                        alt={`${user.user_name}'s profile`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-lg font-bold text-gray-600">
+                        {user.user_name?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    )}
+                  </div>
+                  <span className="hover:underline">{user.user_name}</span>
+                </Link>
               </div>
               {currentUserId !== user.id && (
                 <FollowButton

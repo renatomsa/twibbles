@@ -1,5 +1,7 @@
 import { Trash2 } from "lucide-react";
 import { Comment } from "@/services/commentService";
+import { useState, useEffect } from "react";
+import DeleteCommentModal from "./DeleteCommentModal";
 
 interface CommentProps {
   comment: Comment;
@@ -12,6 +14,9 @@ const CommentComponent: React.FC<CommentProps> = ({
   currentUserId,
   onDelete
 }) => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [validComment, setValidComment] = useState(true);
+
   console.log("Rendering comment:", comment);
 
   // Extract data from the array structure
@@ -35,13 +40,18 @@ const CommentComponent: React.FC<CommentProps> = ({
   const userId = getCommentValue("user_id");
   const userName = getCommentValue("user_name") || `User #${userId}`;
 
+  // Validate if we have a valid comment with required fields
+  useEffect(() => {
+    if (!commentId || !userId) {
+      console.error("Invalid comment data:", comment);
+      setValidComment(false);
+    }
+  }, [comment, commentId, userId]);
+
   const isAuthor = currentUserId === userId;
 
-  const handleDelete = () => {
-    if (onDelete && commentId) {
-      onDelete(commentId);
-    }
-  };
+  // If comment is invalid, don't render anything
+  if (!validComment) return null;
 
   return (
     <div className="py-2 px-3 border-t border-gray-300 mt-2 bg-gray-100 rounded">
@@ -51,7 +61,7 @@ const CommentComponent: React.FC<CommentProps> = ({
         </p>
         {isAuthor && (
           <button
-            onClick={handleDelete}
+            onClick={() => setIsDeleteModalOpen(true)}
             className="text-gray-400 hover:text-red-500"
             aria-label="Delete comment"
           >
@@ -60,6 +70,19 @@ const CommentComponent: React.FC<CommentProps> = ({
         )}
       </div>
       <p className="mt-2 text-sm text-gray-800">{content || "No content"}</p>
+
+      {/* Delete Comment Modal */}
+      <DeleteCommentModal
+        isOpen={isDeleteModalOpen}
+        commentId={commentId}
+        userId={currentUserId}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDeleted={(deletedCommentId) => {
+          if (onDelete) {
+            onDelete(deletedCommentId);
+          }
+        }}
+      />
     </div>
   );
 };

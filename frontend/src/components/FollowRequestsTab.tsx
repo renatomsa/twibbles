@@ -1,5 +1,6 @@
 import { apiService } from '@/lib/api';
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 interface FollowRequestsTabProps {
   userId: number;
@@ -60,32 +61,51 @@ const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
   }
 
   return (
-    <div className="follow-requests-container">
-      <h2 className="text-xl font-bold mb-4">Follow Requests</h2>
+    <div className="follow-requests-container" data-testid="follow-requests-tab">
+      <h2 className="text-xl font-bold mb-4" data-testid="follow-requests-heading">Follow Requests</h2>
       {requests.length === 0 ? (
-        <p>No pending follow requests</p>
+        <p data-testid="no-requests-message">No pending follow requests</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-4" data-testid="follow-requests-list">
           {requests.map((request) => (
-            <li key={request.requester_id} className="flex items-center justify-between p-3 border rounded">
+            <li
+              key={request.requester_id}
+              className="flex items-center justify-between p-3 border rounded"
+              data-testid={`request-item-${request.requester_id}`}
+            >
               <div className="flex items-center">
-                <img 
-                  src={request.requester.profile_img_path} 
-                  alt="User avatar" 
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-                <span>{request.requester.user_name}</span>
+                <Link href={`/profile/${request.requester.id}`} className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden mr-3 cursor-pointer hover:opacity-80 transition-opacity">
+                    {request.requester.profile_img_path ? (
+                      <img
+                        src={request.requester.profile_img_path}
+                        alt={`${request.requester.user_name}'s profile`}
+                        className="w-full h-full object-cover"
+                        data-testid={`requester-avatar-${request.requester_id}`}
+                      />
+                    ) : (
+                      <span className="text-lg font-bold text-gray-600">
+                        {request.requester.user_name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <span className="hover:underline" data-testid={`requester-username-${request.requester_id}`}>
+                    {request.requester.user_name}
+                  </span>
+                </Link>
               </div>
               <div className="flex space-x-2">
-                <button 
+                <button
                   onClick={() => handleAccept(request.requester_id)}
                   className="px-3 py-1 bg-green-500 text-white rounded"
+                  data-testid={`accept-request-${request.requester_id}`}
                 >
                   Accept
                 </button>
-                <button 
+                <button
                   onClick={() => handleReject(request.requester_id)}
                   className="px-3 py-1 bg-red-500 text-white rounded"
+                  data-testid={`reject-request-${request.requester_id}`}
                 >
                   Reject
                 </button>
@@ -98,4 +118,4 @@ const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
   );
 };
 
-export default FollowRequestsTab; 
+export default FollowRequestsTab;

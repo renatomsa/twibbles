@@ -6,6 +6,7 @@ import FollowingTab from '@/components/FollowingTab';
 import FollowRequestsTab from '@/components/FollowRequestsTab';
 import PrivacyButton from '@/components/PrivacyButton';
 import DashboardButton from '@/components/profile/dashboardButton';
+import UserPosts from '@/components/profile/UserPosts';
 import { apiService } from '@/lib/api';
 import { User } from '@/types/user';
 import Image from 'next/image';
@@ -69,20 +70,26 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
             <div className="w-[80%] mx-auto p-6 bg-[#2D2D2D] rounded-lg shadow-sm mt-16">
                 <div className="flex items-start space-x-8">
                     <div className="relative w-[150px] h-[150px] rounded-full overflow-hidden bg-gray-200">
-                        <Image
-                            src={profile.profile_img_path}
-                            alt={`Foto de perfil de ${profile.user_name}`}
-                            fill
-                            className="object-cover"
-                        />
+                        {profile.profile_img_path ? (
+                            <Image
+                                src={profile.profile_img_path}
+                                alt={`Foto de perfil de ${profile.user_name}`}
+                                fill
+                                className="object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-blue-500 text-white text-5xl font-bold">
+                                {profile.user_name.charAt(0).toUpperCase()}
+                            </div>
+                        )}
                     </div>
-                    
+
                     <div className="flex-1">
                         <div className="flex items-center justify-between mb-6">
                             <h1 className="text-2xl font-medium text-[#FFFFFF]">
                                 {profile.user_name}
                             </h1>
-                            
+
                             {isCurrentUser ? (
                                 <div className="flex gap-4">
                                     <PrivacyButton
@@ -107,7 +114,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                                 )
                             )}
                         </div>
-                        
+
                         <p className="text-[#FFFFFF] text-lg">
                             {profile.bio}
                         </p>
@@ -123,27 +130,27 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                 /* Tabs de navegação e conteúdo - só aparecem se puder visualizar */
                 <div className="w-[80%] mx-auto mt-8">
                     <div className="tabs flex border-b mb-4">
-                        <button 
+                        <button
                             className={`tab py-2 px-4 font-medium ${activeTab === 'posts' ? 'border-b-2 border-blue-500' : ''}`}
                             onClick={() => setActiveTab('posts')}
                         >
                             Posts
                         </button>
-                        <button 
+                        <button
                             className={`tab py-2 px-4 font-medium ${activeTab === 'followers' ? 'border-b-2 border-blue-500' : ''}`}
                             onClick={() => setActiveTab('followers')}
                         >
                             Followers
                         </button>
-                        <button 
+                        <button
                             className={`tab py-2 px-4 font-medium ${activeTab === 'following' ? 'border-b-2 border-blue-500' : ''}`}
                             onClick={() => setActiveTab('following')}
                         >
                             Following
                         </button>
-                        
+
                         {isCurrentUser && profile.is_private && (
-                            <button 
+                            <button
                                 className={`tab py-2 px-4 font-medium ${activeTab === 'requests' ? 'border-b-2 border-blue-500' : ''}`}
                                 onClick={() => setActiveTab('requests')}
                             >
@@ -162,23 +169,24 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                     </div>
 
                     <div className="tab-content">
-                        {activeTab === 'posts' && (
-                            <div className="posts-grid">
-                                <p>Posts content</p>
-                            </div>
-                        )}
-                        
-                        {activeTab === 'followers' && profile && currentUserId && (
-                            <FollowersTab 
-                                userId={profile.id} 
-                                currentUserId={currentUserId} 
+                        {activeTab === 'posts' && profile && currentUserId && (
+                            <UserPosts
+                                userId={profile.id}
+                                currentUserId={currentUserId}
                             />
                         )}
-                        
+
+                        {activeTab === 'followers' && profile && currentUserId && (
+                            <FollowersTab
+                                userId={profile.id}
+                                currentUserId={currentUserId}
+                            />
+                        )}
+
                         {activeTab === 'following' && profile && currentUserId && (
-                            <FollowingTab 
-                                userId={profile.id} 
-                                currentUserId={currentUserId} 
+                            <FollowingTab
+                                userId={profile.id}
+                                currentUserId={currentUserId}
                             />
                         )}
                         
@@ -192,7 +200,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                                 </Link>
                             </div>
                         )}
-                        
+
                         {activeTab === 'requests' && isCurrentUser && profile?.is_private && (
                             <FollowRequestsTab userId={profile.id} />
                         )}
