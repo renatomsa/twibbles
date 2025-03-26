@@ -32,7 +32,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       const followingResponse = await apiService.get<User[]>(`/follow/${currentUserId}/following`);
       
       // Check if profile user is in the following list
-      const isFollowing = followingResponse.data.some(
+      const isFollowing = followingResponse.data?.some(
         (user: User) => user.id === profileUserId
       );
       
@@ -44,7 +44,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       // If not following and profile is private, check if request was sent
       if (isPrivateAccount) {
         const requestsResponse = await apiService.get<FollowRequest[]>(`/follow/${currentUserId}/follow_requests_as_requester`);
-        const requestSent = requestsResponse.data.some(
+        const requestSent = requestsResponse.data?.some(
           (request: FollowRequest) => request.requested_id === profileUserId
         );
         

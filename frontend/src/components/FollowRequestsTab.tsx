@@ -27,7 +27,7 @@ const FollowRequestsTab: React.FC<FollowRequestsTabProps> = ({ userId }) => {
     try {
       setLoading(true);
       const response = await apiService.get<FollowRequest[]>(`/follow/${userId}/follow_requests_as_requested`);
-      setRequests(response.data);
+      setRequests(response.data || []);
     } catch (error) {
       console.error('Error fetching follow requests:', error);
     } finally {

@@ -20,7 +20,7 @@ const FollowersTab: React.FC<FollowersTabProps> = ({ userId, currentUserId }) =>
     try {
       setLoading(true);
       const response = await apiService.get<User[]>(`/follow/${userId}/followers`);
-      setFollowers(response.data);
+      setFollowers(response.data || []);
     } catch (error) {
       console.error('Error fetching followers:', error);
     } finally {
