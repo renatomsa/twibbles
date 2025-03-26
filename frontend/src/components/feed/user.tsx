@@ -150,6 +150,8 @@ const User = () => {
                   post_text={post.text}
                   currentUserId={currentUserId}
                   currentUserName={userName}
+                  location={post.location}
+                  hashtags={post.hashtags}
                 />
               </div>
             ))}
